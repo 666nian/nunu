@@ -4,7 +4,7 @@
    版本号变更即清旧缓存，确保素材更新时用户拿到新文件
    ============================================================ */
 
-const CACHE_NAME = 'nunu-images-v14';
+const CACHE_NAME = 'nunu-images-v15';
 
 // 安装后立即激活，不等待其他标签页关闭
 self.addEventListener('install', () => {
