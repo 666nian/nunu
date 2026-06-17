@@ -375,8 +375,10 @@ input[type="checkbox"]:checked::after {
   transform: translateY(-1px);
 }
 .variant-img-btn.active {
-  border-color: var(--pink);
-  box-shadow: 0 0 14px rgba(232,168,184,0.40);
+  border-color: #D08090;
+  border-width: 2.5px;
+  box-shadow: 0 0 0 2px rgba(208,128,144,0.25), 0 2px 8px rgba(208,128,144,0.2);
+  transform: scale(1.05);
 }
 
 /* Variant fold toggle */
@@ -1872,18 +1874,11 @@ function renderPreviewBase() {
     const x = (PREVIEW_DISPLAY_SIZE - cache.width) / 2 + off.x;
     const y = (PREVIEW_DISPLAY_SIZE - cache.height) / 2 + off.y;
     if (override.shadow) {
-      pCtx.shadowColor = override.shadow.color;
-      pCtx.shadowBlur = override.shadow.blur;
-      pCtx.shadowOffsetX = override.shadow.offsetX;
-      pCtx.shadowOffsetY = override.shadow.offsetY;
+      pCtx.globalAlpha = 0.35;
+      pCtx.drawImage(cache, x + override.shadow.offsetX, y + override.shadow.offsetY);
+      pCtx.globalAlpha = 1;
     }
     pCtx.drawImage(cache, x, y);
-    if (override.shadow) {
-      pCtx.shadowColor = 'transparent';
-      pCtx.shadowBlur = 0;
-      pCtx.shadowOffsetX = 0;
-      pCtx.shadowOffsetY = 0;
-    }
   }
 }
 
@@ -1939,15 +1934,7 @@ function renderPreviewOverlay() {
     const sw = Math.round(crop.w * s);
     const sh = Math.round(crop.h * s);
 
-    // 3. Apply shadow if configured
-    if (crop.shadow) {
-      pCtx.shadowColor = crop.shadow.color;
-      pCtx.shadowBlur = crop.shadow.blur;
-      pCtx.shadowOffsetX = crop.shadow.offsetX;
-      pCtx.shadowOffsetY = crop.shadow.offsetY;
-    }
-
-    // 4. Add preview position offset from components with previewPositionable
+    // 3. Add preview position offset from components with previewPositionable
     let extraOffY = 0;
     for (const comp of SORTED) {
       if (comp.layer >= layerMin && comp.layer <= layerMax && comp.previewPositionable) {
@@ -1956,18 +1943,17 @@ function renderPreviewOverlay() {
       }
     }
 
-    // 5. Draw 1:1 on preview (edit-scale, no further shrink)
+    // 4. Draw 1:1 on preview (edit-scale, no further shrink)
     const dx = Math.round((PREVIEW_DISPLAY_SIZE - sw) / 2 + crop.offsetX * PREVIEW_DISPLAY_SIZE);
     const dy = Math.round((PREVIEW_DISPLAY_SIZE - sh) / 2 + crop.offsetY * PREVIEW_DISPLAY_SIZE + extraOffY);
-    pCtx.drawImage(temp, sx, sy, sw, sh, dx, dy, sw, sh);
 
-    // Reset shadow
+    // Shadow: alpha-offset pass (fast — no canvas blur)
     if (crop.shadow) {
-      pCtx.shadowColor = 'transparent';
-      pCtx.shadowBlur = 0;
-      pCtx.shadowOffsetX = 0;
-      pCtx.shadowOffsetY = 0;
+      pCtx.globalAlpha = 0.35;
+      pCtx.drawImage(temp, sx, sy, sw, sh, dx + crop.shadow.offsetX, dy + crop.shadow.offsetY, sw, sh);
+      pCtx.globalAlpha = 1;
     }
+    pCtx.drawImage(temp, sx, sy, sw, sh, dx, dy, sw, sh);
   }
 }
 
@@ -2346,7 +2332,6 @@ function toggleVisibility(compId, visible) {
 
   scheduleRender();
   if (linked) rebuildPanel(); // sync both checkboxes
-  if (isMobile()) refreshPreview();
   saveState();
 }
 
@@ -2370,8 +2355,8 @@ async function switchVariant(compId, variantIdx) {
   }
 
   scheduleRender();
-  // Desktop: only front hair auto-refreshes preview. Mobile: all components do.
-  if (isMobile() || compId === 'hair_front_base' || compId === 'hair_front_strands') {
+  // Desktop: only front hair auto-refreshes preview. Mobile: scheduleRender already does it.
+  if (!isMobile() && (compId === 'hair_front_base' || compId === 'hair_front_strands')) {
     refreshPreview();
   }
   saveState();
