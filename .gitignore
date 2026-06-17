@@ -13,9 +13,6 @@ images/脸部定位备份.png
 # 已废弃组件文件
 images/face_other_edit.png
 
-# PSD源文件
-images/cloth.psd
-
 # Python
 __pycache__/
 *.pyc
