@@ -2193,12 +2193,16 @@ async function preloadCategoryThumbnails(catKey) {
     const cs = state.components[comp.id];
     if (!cs.thumbnailBlobs) cs.thumbnailBlobs = {};
     for (let i = 0; i < comp.variants.length; i++) {
-      if (cs.thumbnailBlobs[i]) continue; // already cached
-      tasks.push(
-        generateThumbnail(comp, i).then(url => {
-          if (url) cs.thumbnailBlobs[i] = url;
-        })
-      );
+      if (cs.thumbnailBlobs[i]) continue;
+      const thumbFile = getThumbFile(comp, i);
+      tasks.push(new Promise((resolve) => {
+        const img = new Image();
+        img.onload = img.onerror = () => {
+          cs.thumbnailBlobs[i] = thumbFile;
+          resolve();
+        };
+        img.src = thumbFile + CACHE_BUST;
+      }));
     }
   }
   await Promise.allSettled(tasks);
@@ -3779,6 +3783,16 @@ function buildEyeRow(side) {
   return row;
 }
 
+function getThumbFile(comp, variantIdx) {
+  const variant = comp.variants[variantIdx];
+  if (!variant) return null;
+  // Thumbnail-only file override: left part variant 4 uses right part image
+  if (comp.id === 'eye_part_left' && variantIdx === 3) {
+    return 'images/thumbnails/face_eye_right_part_edit4.png';
+  }
+  return variant.file.replace('images/', 'images/thumbnails/');
+}
+
 function buildVariantBtns(comp, onChange) {
   const cs = state.components[comp.id];
   if (!cs.thumbnailBlobs) cs.thumbnailBlobs = {};
@@ -3793,31 +3807,45 @@ function buildVariantBtns(comp, onChange) {
 
     const cached = cs.thumbnailBlobs[i];
     if (cached) {
-      // Use cached thumbnail
       const imgEl = document.createElement('img');
       imgEl.src = cached;
       imgEl.alt = comp.variants[i].label;
       btn.appendChild(imgEl);
     } else {
-      // Placeholder while async generation runs
       btn.textContent = '…';
       btn.style.color = '#B8A8C0';
       btn.style.fontSize = '12px';
-      generateThumbnail(comp, i).then(url => {
-        if (url) {
-          cs.thumbnailBlobs[i] = url;
-          // Only update if button is still in DOM
-          if (btn.isConnected) {
-            btn.innerHTML = '';
-            btn.style.color = '';
-            btn.style.fontSize = '';
-            const imgEl = document.createElement('img');
-            imgEl.src = url;
-            imgEl.alt = comp.variants[i].label;
-            btn.appendChild(imgEl);
-          }
+
+      const thumbFile = getThumbFile(comp, i);
+      const imgEl = document.createElement('img');
+      imgEl.alt = comp.variants[i].label;
+      imgEl.onload = () => {
+        cs.thumbnailBlobs[i] = thumbFile;
+        if (btn.isConnected) {
+          btn.innerHTML = '';
+          btn.style.color = '';
+          btn.style.fontSize = '';
+          btn.appendChild(imgEl);
         }
-      });
+      };
+      imgEl.onerror = () => {
+        // Fallback: generate thumbnail on-the-fly
+        generateThumbnail(comp, i).then(url => {
+          if (url) {
+            cs.thumbnailBlobs[i] = url;
+            if (btn.isConnected) {
+              btn.innerHTML = '';
+              btn.style.color = '';
+              btn.style.fontSize = '';
+              const fallbackImg = document.createElement('img');
+              fallbackImg.src = url;
+              fallbackImg.alt = comp.variants[i].label;
+              btn.appendChild(fallbackImg);
+            }
+          }
+        });
+      };
+      imgEl.src = thumbFile + CACHE_BUST;
     }
 
     btn.addEventListener('click', () => {
