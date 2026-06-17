@@ -925,6 +925,24 @@ input[type="checkbox"]:checked::after {
     border-radius: 3px;
     background: var(--pink);
   }
+  .mobile-tab.loading {
+    color: transparent;
+    pointer-events: none;
+  }
+  .mobile-tab.loading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 16px; height: 16px;
+    border: 2px solid #E0D0E0;
+    border-top-color: var(--pink);
+    border-radius: 50%;
+    animation: cp-spin 0.6s linear infinite;
+  }
+  @keyframes cp-spin {
+    to { transform: rotate(360deg); }
+  }
 
   /* ── 抽屉遮罩（透明，不覆盖导航栏和底部标签栏） ── */
   #mobile-drawer-overlay {
@@ -2167,6 +2185,25 @@ async function generateThumbnail(comp, variantIdx) {
     }, 'image/png');
   });
 }
+// Preload thumbnails for all variants in a category (mobile lazy-load)
+async function preloadCategoryThumbnails(catKey) {
+  const catComps = COMPONENTS.filter(c => c.category === catKey && !c.hidden);
+  const tasks = [];
+  for (const comp of catComps) {
+    const cs = state.components[comp.id];
+    if (!cs.thumbnailBlobs) cs.thumbnailBlobs = {};
+    for (let i = 0; i < comp.variants.length; i++) {
+      if (cs.thumbnailBlobs[i]) continue; // already cached
+      tasks.push(
+        generateThumbnail(comp, i).then(url => {
+          if (url) cs.thumbnailBlobs[i] = url;
+        })
+      );
+    }
+  }
+  await Promise.allSettled(tasks);
+}
+
 /* ============================================================
    SECTION 6: IMAGE LOADING
    ============================================================ */
@@ -4040,8 +4077,13 @@ async function init() {
   }
 
   document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      openMobileDrawer(tab.dataset.cat);
+    tab.addEventListener('click', async () => {
+      const catKey = tab.dataset.cat;
+      // Show loading state on tab
+      tab.classList.add('loading');
+      await preloadCategoryThumbnails(catKey);
+      tab.classList.remove('loading');
+      openMobileDrawer(catKey);
     });
   });
 
