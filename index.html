@@ -2274,28 +2274,38 @@ async function loadComponent(comp, variantIdx) {
 }
 
 async function preloadAllLightImages(offset, total) {
-  // Preload all non-default light variant images into browser cache
+  // Preload all non-default light variant + preview images into browser cache
   const tasks = [];
   let done = 0;
   const fillEl = document.getElementById('progress-fill');
   const progressEl = document.getElementById('load-progress');
+  const pushTask = (lightPath) => {
+    tasks.push(new Promise((resolve) => {
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        done++;
+        const pct = Math.round((offset + done) / total * 100);
+        fillEl.style.width = pct + '%';
+        progressEl.textContent = pct + '%';
+        resolve();
+      };
+      img.src = lightPath + CACHE_BUST;
+    }));
+  };
+  // Edit light images for non-default variants
   for (const comp of COMPONENTS) {
     const cs = state.components[comp.id];
     for (let i = 0; i < comp.variants.length; i++) {
-      if (i === cs.currentVariant) continue; // already loaded
-      const lightFile = comp.variants[i].file.replace('images/', 'images/light/');
-      tasks.push(new Promise((resolve) => {
-        const img = new Image();
-        img.onload = img.onerror = () => {
-          done++;
-          const pct = Math.round((offset + done) / total * 100);
-          fillEl.style.width = pct + '%';
-          progressEl.textContent = pct + '%';
-          resolve();
-        };
-        img.src = lightFile + CACHE_BUST;
-      }));
+      if (i === cs.currentVariant) continue;
+      pushTask(comp.variants[i].file.replace('images/', 'images/light/'));
     }
+  }
+  // Preview light images
+  for (const [id, ov] of Object.entries(PREVIEW_OVERRIDES)) {
+    if (ov.variants) {
+      for (const f of ov.variants) pushTask(f.replace('images/', 'images/light/'));
+    }
+    if (ov.file) pushTask(ov.file.replace('images/', 'images/light/'));
   }
   await Promise.allSettled(tasks);
 }
@@ -2306,7 +2316,12 @@ async function loadAllDefaults() {
   const fillEl = document.getElementById('progress-fill');
 
   const compCount = COMPONENTS.length;
-  const totalVariants = COMPONENTS.reduce((s, c) => s + c.variants.length, 0);
+  let totalVariants = COMPONENTS.reduce((s, c) => s + c.variants.length, 0);
+  // Count preview images too
+  for (const ov of Object.values(PREVIEW_OVERRIDES)) {
+    if (ov.variants) totalVariants += ov.variants.length;
+    if (ov.file) totalVariants += 1;
+  }
   let loaded = 0;
 
   const tasks = COMPONENTS.map((comp) =>
