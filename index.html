@@ -1266,7 +1266,7 @@ input[type="checkbox"]:checked::after {
   <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
   <div class="load-progress" id="load-progress"></div>
   <div class="load-tip">请注意阅读界面内文字哦</div>
-  <div class="load-tip" style="margin-top:4px;font-size:11px;opacity:0.7;">每次刷新需要加载半分钟左右，画布赶来中……</div>
+  <div class="load-tip" style="margin-top:4px;font-size:11px;opacity:0.7;">画布赶来中……</div>
 </div>
 
 <!-- Header -->
@@ -2167,50 +2167,6 @@ async function generateThumbnail(comp, variantIdx) {
     }, 'image/png');
   });
 }
-function startFakeProgress(fillEl, progressEl, startPct) {
-  // CSS transition runs on compositor thread, not blocked by JS canvas work
-  fillEl.style.transition = 'width 10s cubic-bezier(0.25, 0.1, 0.25, 1)';
-  fillEl.style.width = '99%';
-
-  // Interpolate text number via rAF
-  let rafId;
-  const startTime = performance.now();
-  function tick() {
-    const elapsed = performance.now() - startTime;
-    const t = Math.min(elapsed / 10000, 1);
-    const eased = 1 - Math.pow(1 - t, 3);
-    const pct = Math.round(startPct + eased * (99 - startPct));
-    progressEl.textContent = pct + '%';
-    if (pct < 99) rafId = requestAnimationFrame(tick);
-  }
-  rafId = requestAnimationFrame(tick);
-
-  return {
-    finish() {
-      cancelAnimationFrame(rafId);
-      fillEl.style.transition = 'width 0.2s ease';
-      fillEl.style.width = '100%';
-      progressEl.textContent = '100%';
-    }
-  };
-}
-
-async function preloadAllThumbnails() {
-  const tasks = [];
-  for (const comp of COMPONENTS) {
-    const cs = state.components[comp.id];
-    if (!cs.thumbnailBlobs) cs.thumbnailBlobs = {};
-    for (let i = 0; i < comp.variants.length; i++) {
-      tasks.push(
-        generateThumbnail(comp, i).then(url => {
-          if (url) cs.thumbnailBlobs[i] = url;
-        })
-      );
-    }
-  }
-  await Promise.allSettled(tasks);
-}
-
 /* ============================================================
    SECTION 6: IMAGE LOADING
    ============================================================ */
@@ -2265,25 +2221,18 @@ async function loadAllDefaults() {
   const fillEl = document.getElementById('progress-fill');
 
   const compCount = COMPONENTS.length;
-  const REAL_CAP = 20; // real progress covers first 20%
   let loaded = 0;
 
-  // Phase 1: real progress per component loaded
   const tasks = COMPONENTS.map((comp) =>
     loadComponent(comp, 0).then(() => {
       loaded++;
-      const pct = Math.round(loaded / compCount * REAL_CAP);
+      const pct = Math.round(loaded / compCount * 100);
       fillEl.style.width = pct + '%';
       progressEl.textContent = pct + '%';
     })
   );
   await Promise.allSettled(tasks);
 
-  // Phase 2: fake progress animation 20%→99% over 10s
-  const fake = startFakeProgress(fillEl, progressEl, REAL_CAP);
-  await preloadAllThumbnails();
-
-  fake.finish();
   loadingEl.classList.add('hidden');
 }
 
@@ -3987,7 +3936,6 @@ async function init() {
     const progressEl = document.getElementById('load-progress');
 
     const compCount = COMPONENTS.length;
-    const REAL_CAP = 20;
     let loaded = 0;
 
     const tasks = COMPONENTS.map(comp => {
@@ -3996,17 +3944,13 @@ async function init() {
         ? cs.currentVariant : 0;
       return loadComponent(comp, idx).then(() => {
         loaded++;
-        const pct = Math.round(loaded / compCount * REAL_CAP);
+        const pct = Math.round(loaded / compCount * 100);
         fillEl.style.width = pct + '%';
         progressEl.textContent = pct + '%';
       });
     });
     await Promise.allSettled(tasks);
 
-    const fake = startFakeProgress(fillEl, progressEl, REAL_CAP);
-    await preloadAllThumbnails();
-
-    fake.finish();
     document.getElementById('loading').classList.add('hidden');
   } else {
     // Fresh start — load defaults
