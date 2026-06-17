@@ -1623,7 +1623,6 @@ for (const comp of COMPONENTS) {
     offsetX: 0,
     offsetY: 0,
     originalImage: null,
-    scaledImage: null,
     imageUrl: null,
     editCache: null,
     loaded: false,
@@ -1678,22 +1677,11 @@ function getLinkSource(comp) {
 async function buildEditCache(comp, keepOriginal) {
   const cs = state.components[comp.id];
 
-  // Use scaled cache for non-halfSide (fast 700px), original for halfSide
-  let img = (!comp.halfSide && cs.scaledImage) ? cs.scaledImage : cs.originalImage;
+  // Reload image if it was freed (lazy-load optimization)
+  let img = cs.originalImage;
   if (!img && cs.imageUrl) {
     try {
       img = await loadImage(cs.imageUrl);
-      // Pre-scale reloaded image too
-      if (!comp.halfSide) {
-        const rs = EDIT_SIZE / Math.max(img.naturalWidth, img.naturalHeight);
-        const rsw = Math.round(img.naturalWidth * rs);
-        const rsh = Math.round(img.naturalHeight * rs);
-        const rscaled = document.createElement('canvas');
-        rscaled.width = rsw; rscaled.height = rsh;
-        rscaled.getContext('2d').drawImage(img, 0, 0, rsw, rsh);
-        cs.scaledImage = rscaled;
-        img = rscaled;
-      }
     } catch (err) {
       console.error(`重新加载图片失败: ${comp.name}`, err);
       return null;
@@ -1701,11 +1689,9 @@ async function buildEditCache(comp, keepOriginal) {
   }
   if (!img) return null;
 
-  const iw = img.naturalWidth || img.width;
-  const ih = img.naturalHeight || img.height;
-  const fitScale = EDIT_SIZE / Math.max(iw, ih);
-  const w = Math.round(iw * fitScale);
-  const h = Math.round(ih * fitScale);
+  const fitScale = EDIT_SIZE / Math.max(img.naturalWidth, img.naturalHeight);
+  const w = Math.round(img.naturalWidth * fitScale);
+  const h = Math.round(img.naturalHeight * fitScale);
 
   // Plan B: reuse existing editCache canvas when dimensions match,
   // avoiding per-frame canvas allocation + GC churn during color drag.
@@ -1727,8 +1713,8 @@ async function buildEditCache(comp, keepOriginal) {
   if (doFlip) { const ax = 2 * w * (comp.flipAxis || 0.5); ctx.save(); ctx.translate(ax, 0); ctx.scale(-1, 1); }
 
   const color = getEffectiveColor(comp);
-  const nw = img.naturalWidth || img.width;
-  const nh = img.naturalHeight || img.height;
+  const nw = img.naturalWidth;
+  const nh = img.naturalHeight;
 
   const drawHalf = (ctxObj, targetImg) => {
     const C = EYE_HL_CROP;
@@ -2245,7 +2231,6 @@ async function loadComponent(comp, variantIdx) {
 
   // Release old resources before loading new variant
   cs.originalImage = null;
-  cs.scaledImage = null;
   cs.editCache = null;
   cs.previewCache = null;
   cs.thumbnailBlobs = {};
@@ -2255,16 +2240,6 @@ async function loadComponent(comp, variantIdx) {
     cs.originalImage = img;
     cs.imageUrl = variant.file;
     cs.currentVariant = variantIdx;
-
-    // Pre-scale to EDIT_SIZE: avoid full-res rescale on every recolor
-    const s = EDIT_SIZE / Math.max(img.naturalWidth, img.naturalHeight);
-    const sw = Math.round(img.naturalWidth * s);
-    const sh = Math.round(img.naturalHeight * s);
-    const scaled = document.createElement('canvas');
-    scaled.width = sw; scaled.height = sh;
-    scaled.getContext('2d').drawImage(img, 0, 0, sw, sh);
-    cs.scaledImage = scaled;
-
     // keepOriginal=false → frees originalImage after building cache
     await buildEditCache(comp, false);
     cs.dirty = false;
