@@ -2192,6 +2192,13 @@ async function loadComponent(comp, variantIdx) {
   cs.originalImage = null;
   cs.editCache = null;
   cs.uncoloredCache = null;
+  cs.previewCache = null;
+  if (cs.thumbnailBlobs) {
+    for (const url of Object.values(cs.thumbnailBlobs)) {
+      if (url) URL.revokeObjectURL(url);
+    }
+    cs.thumbnailBlobs = null;
+  }
 
   try {
     const img = await loadImage(variant.file);
