@@ -1874,11 +1874,18 @@ function renderPreviewBase() {
     const x = (PREVIEW_DISPLAY_SIZE - cache.width) / 2 + off.x;
     const y = (PREVIEW_DISPLAY_SIZE - cache.height) / 2 + off.y;
     if (override.shadow) {
-      pCtx.globalAlpha = 0.35;
-      pCtx.drawImage(cache, x + override.shadow.offsetX, y + override.shadow.offsetY);
-      pCtx.globalAlpha = 1;
+      pCtx.shadowColor = override.shadow.color;
+      pCtx.shadowBlur = override.shadow.blur;
+      pCtx.shadowOffsetX = override.shadow.offsetX;
+      pCtx.shadowOffsetY = override.shadow.offsetY;
     }
     pCtx.drawImage(cache, x, y);
+    if (override.shadow) {
+      pCtx.shadowColor = 'transparent';
+      pCtx.shadowBlur = 0;
+      pCtx.shadowOffsetX = 0;
+      pCtx.shadowOffsetY = 0;
+    }
   }
 }
 
@@ -1947,13 +1954,20 @@ function renderPreviewOverlay() {
     const dx = Math.round((PREVIEW_DISPLAY_SIZE - sw) / 2 + crop.offsetX * PREVIEW_DISPLAY_SIZE);
     const dy = Math.round((PREVIEW_DISPLAY_SIZE - sh) / 2 + crop.offsetY * PREVIEW_DISPLAY_SIZE + extraOffY);
 
-    // Shadow: alpha-offset pass (fast — no canvas blur)
+    // 5. Apply shadow if configured
     if (crop.shadow) {
-      pCtx.globalAlpha = 0.35;
-      pCtx.drawImage(temp, sx, sy, sw, sh, dx + crop.shadow.offsetX, dy + crop.shadow.offsetY, sw, sh);
-      pCtx.globalAlpha = 1;
+      pCtx.shadowColor = crop.shadow.color;
+      pCtx.shadowBlur = crop.shadow.blur;
+      pCtx.shadowOffsetX = crop.shadow.offsetX;
+      pCtx.shadowOffsetY = crop.shadow.offsetY;
     }
     pCtx.drawImage(temp, sx, sy, sw, sh, dx, dy, sw, sh);
+    if (crop.shadow) {
+      pCtx.shadowColor = 'transparent';
+      pCtx.shadowBlur = 0;
+      pCtx.shadowOffsetX = 0;
+      pCtx.shadowOffsetY = 0;
+    }
   }
 }
 
