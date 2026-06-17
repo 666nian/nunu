@@ -1,0 +1,3736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>努努梦工厂</title>
+<link rel="icon" type="image/png" href="images/logo.png">
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+:root {
+  --panel-w: 320px;
+  --header-h: 44px;
+
+  /* ── 色盘 ── */
+  --pink:        #E8A8B8;
+
+  /* ── 文字色 ── */
+  --text:        #5A4A5E;
+  --text-soft:   #908098;
+  --text-muted:  #B8A8C0;
+
+  /* ── 阴影 ── */
+  --shadow-xs:   0 1px 3px rgba(180,160,190,0.06);
+  --glow-pink:   0 0 18px rgba(232,168,184,0.30);
+
+  /* ── 圆角 ── */
+  --r-xs:   6px;
+  --r-sm:   10px;
+  --r-md:   16px;
+  --r-pill: 50px;
+  --r-full: 9999px;
+
+  /* ── 字体 ── */
+  --font: 'Noto Sans SC', 'M PLUS Rounded 1c', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ============================================================
+   Body — 弥散渐变背景
+   ============================================================ */
+body {
+  font-family: var(--font);
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 20%, rgba(248,208,220,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 80% 30%, rgba(208,220,244,0.20) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 50% 80%, rgba(200,232,216,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 70% 70%, rgba(224,216,240,0.16) 0%, transparent 50%),
+    linear-gradient(170deg, #FDF6F9 0%, #F8F4FA 25%, #F4F6FC 50%, #F6F4F8 75%, #FDF6F9 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  letter-spacing: 0.2px;
+  font-weight: 400;
+  font-size: 15px;
+}
+
+/* ============================================================
+   Header — 磨砂玻璃 · 小巧简约
+   ============================================================ */
+header {
+  height: var(--header-h);
+  background: rgba(255,255,255,0.70);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-bottom: 1px solid rgba(220,200,215,0.30);
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  gap: 8px;
+  z-index: 10;
+  position: relative;
+}
+header .badge {
+  font-size: 9px;
+  background: linear-gradient(135deg, rgba(232,168,184,0.20), rgba(168,196,232,0.20));
+  color: #C88898;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+.header-nav {
+  display: flex;
+  gap: 6px;
+  margin-left: 8px;
+}
+.nav-brand {
+  font-size: 15px;
+  font-weight: 600;
+  color: #6B5B6E;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  margin-right: auto;
+  transition: color 0.2s;
+}
+.nav-brand:hover { color: #D08090; }
+.nav-link {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-soft);
+  text-decoration: none;
+  padding: 5px 14px;
+  border-radius: var(--r-pill);
+  transition: all 0.25s var(--ease);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.nav-link:hover {
+  color: var(--pink);
+  background: rgba(232,168,184,0.08);
+  border-color: rgba(232,168,184,0.25);
+}
+.nav-link.active {
+  color: var(--pink);
+  background: rgba(232,168,184,0.10);
+  border-color: rgba(232,168,184,0.30);
+  font-weight: 600;
+}
+
+/* ============================================================
+   Main Layout
+   ============================================================ */
+main {
+  display: flex;
+  height: calc(100vh - var(--header-h));
+}
+
+/* ============================================================
+   Panel — 磨砂玻璃侧边栏
+   ============================================================ */
+#panel {
+  width: var(--panel-w);
+  min-width: var(--panel-w);
+  background: rgba(255,255,255,0.66);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  color: var(--text);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-right: 1px solid rgba(220,200,215,0.22);
+  scrollbar-width: thin;
+  scrollbar-color: #E8D8E8 transparent;
+}
+#panel::-webkit-scrollbar { width: 5px; }
+#panel::-webkit-scrollbar-track { background: transparent; }
+#panel::-webkit-scrollbar-thumb { background: #E0D0E0; border-radius: 10px; }
+#panel::-webkit-scrollbar-thumb:hover { background: #D0BED0; }
+
+/* ── Category ── */
+.category {
+  border-bottom: 1px solid rgba(220,200,215,0.20);
+}
+.category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 20px;
+  background: rgba(255,252,254,0.45);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.30s var(--ease);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  color: var(--text-soft);
+  letter-spacing: 0.3px;
+  border-radius: 0;
+}
+.category-header:hover {
+  background: rgba(255,245,250,0.65);
+}
+.category.open .category-header {
+  background: linear-gradient(135deg, rgba(255,215,228,0.50), rgba(215,225,248,0.50));
+  box-shadow: 0 2px 12px rgba(200,180,200,0.10);
+  color: #D08090;
+  font-weight: 600;
+}
+.category-header .arrow {
+  font-size: 11px;
+  transition: transform 0.30s var(--ease);
+  color: #C8B0C0;
+  opacity: 0.7;
+}
+.category.open .category-header .arrow {
+  transform: rotate(90deg);
+  color: #D08090;
+  opacity: 1;
+}
+.category-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s var(--ease);
+}
+.category.open .category-body {
+  max-height: 1200px;
+}
+
+/* ── FAQ Block — 分类底部 Q&A ── */
+.faq-block {
+  margin: 6px 14px 10px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, rgba(255,240,248,0.55), rgba(240,244,255,0.50));
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(220,200,215,0.28);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-soft);
+}
+.faq-block .faq-q {
+  font-weight: 600;
+  color: #C88898;
+  margin-bottom: 2px;
+  letter-spacing: 0.1px;
+}
+.faq-block .faq-a {
+  font-weight: 400;
+  color: var(--text-soft);
+  letter-spacing: 0;
+}
+.faq-block .faq-link {
+  color: var(--pink);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+.faq-block .faq-link:hover {
+  color: #D08098;
+}
+
+/* ── Component Row ── */
+.comp-row {
+  padding: 10px 20px;
+  background: transparent;
+  border-bottom: 1px solid rgba(220,200,215,0.15);
+  transition: background 0.20s var(--ease);
+}
+.comp-row:hover {
+  background: rgba(255,245,250,0.55);
+}
+.comp-row-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+}
+.comp-name {
+  font-size: 13px;
+  font-weight: 500;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+  letter-spacing: 0.1px;
+}
+.linked-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+
+/* ============================================================
+   Custom Checkbox — 二次元圆角渐变
+   ============================================================ */
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px; height: 18px;
+  border: 1.5px solid #D8C8D8;
+  border-radius: var(--r-xs);
+  background: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.25s var(--ease);
+  margin: 0;
+  position: relative;
+}
+input[type="checkbox"]:hover {
+  border-color: #E0B8C8;
+  box-shadow: 0 0 8px rgba(232,168,184,0.18);
+}
+input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, #F0B8C8, #B8C8F0);
+  border-color: transparent;
+}
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px; top: 2px;
+  width: 6px; height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ============================================================
+   Color Swatch — 柔光圆点
+   ============================================================ */
+.color-swatch {
+  width: 26px; height: 26px;
+  border-radius: var(--r-full);
+  border: 2px solid #E8D8E8;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.25s var(--ease);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.color-swatch:hover {
+  transform: scale(1.22);
+  box-shadow: var(--glow-pink);
+  border-color: var(--pink);
+}
+.color-swatch input[type="color"] {
+  position: absolute;
+  inset: 0; opacity: 0;
+  width: 100%; height: 100%;
+  cursor: pointer;
+  border-radius: var(--r-full);
+}
+
+/* ============================================================
+   Variant Image Buttons — 圆润缩略图
+   ============================================================ */
+.variant-btns {
+  display: flex;
+  gap: 5px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.variant-img-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1.5px solid #E0D0E0;
+  border-radius: var(--r-sm);
+  background: #fff;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.25s var(--ease);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.variant-img-btn img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+.variant-img-btn:hover {
+  border-color: #D8B8C8;
+  box-shadow: 0 0 14px rgba(232,168,184,0.25);
+  transform: translateY(-1px);
+}
+.variant-img-btn.active {
+  border-color: var(--pink);
+  box-shadow: 0 0 14px rgba(232,168,184,0.40);
+}
+
+/* Variant fold toggle */
+.variant-toggle {
+  width: 20px; height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #C0B0C8;
+  cursor: pointer;
+  font-size: 10px;
+  flex-shrink: 0;
+  transition: transform 0.25s var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-xs);
+}
+.variant-toggle:hover {
+  color: #A088A8;
+  background: rgba(200,180,200,0.15);
+}
+.variant-toggle.open {
+  transform: rotate(90deg);
+}
+.variant-current {
+  font-size: 11px;
+  color: #B8A0B8;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+.variant-fold {
+  display: none;
+  padding: 4px 0 4px 26px;
+}
+.variant-fold.open {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.pos-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0 2px 26px;
+}
+.pos-btn {
+  width: 22px; height: 22px;
+  padding: 0;
+  border: 1px solid rgba(200,180,200,0.3);
+  border-radius: var(--r-xs);
+  background: rgba(255,245,250,0.4);
+  color: var(--text-soft);
+  cursor: pointer;
+  font-size: 10px;
+  transition: all 0.2s var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  user-select: none;
+}
+.pos-btn:hover {
+  background: var(--pink);
+  color: #fff;
+  border-color: var(--pink);
+}
+.pos-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+/* ============================================================
+   Upload Section — 虚线导入区
+   ============================================================ */
+.upload-section {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(220,200,215,0.22);
+}
+.upload-btn {
+  flex: 1;
+  padding: 9px 0;
+  border: 1.5px dashed #D8C8D8;
+  border-radius: var(--r-sm);
+  background: rgba(255,255,255,0.45);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.28s var(--ease);
+  font-family: var(--font);
+  text-align: center;
+  text-decoration: none;
+  letter-spacing: 0.1px;
+}
+.upload-btn:hover {
+  border-color: var(--pink);
+  color: var(--pink);
+  background: rgba(232,168,184,0.06);
+  box-shadow: 0 0 16px rgba(232,168,184,0.14);
+}
+
+/* ── User upload row ── */
+.upload-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  background: rgba(240,246,240,0.45);
+  border-bottom: 1px solid rgba(220,200,215,0.15);
+  font-size: 12px;
+}
+.upload-row .upload-name {
+  flex: 1;
+  color: #7A8A7A;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+.upload-row .upload-remove {
+  background: none;
+  border: none;
+  color: #E098A8;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 2px 7px;
+  border-radius: var(--r-xs);
+  transition: all 0.20s var(--ease);
+  line-height: 1;
+  font-family: var(--font);
+}
+.upload-row .upload-remove:hover {
+  background: rgba(224,152,168,0.12);
+  color: #D06878;
+}
+
+/* ============================================================
+   Canvas Area — 细渐变描边 · 重点突出
+   ============================================================ */
+#canvas-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 20px;
+  overflow: auto;
+}
+#canvas-area::-webkit-scrollbar { width: 5px; }
+#canvas-area::-webkit-scrollbar-track { background: transparent; }
+#canvas-area::-webkit-scrollbar-thumb { background: #E0D0E0; border-radius: 10px; }
+
+.canvases-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: auto;
+}
+.canvas-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.canvas-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+/* ── 主画布：细渐变描边 ── */
+#canvas-wrap {
+  position: relative;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  flex-shrink: 0;
+  padding: 2px;
+  background: linear-gradient(145deg,
+    rgba(240,200,215,0.7),
+    rgba(200,210,240,0.6),
+    rgba(185,220,210,0.6),
+    rgba(210,195,225,0.5));
+  box-shadow: 0 2px 24px rgba(180,160,190,0.12),
+              0 0 40px rgba(232,168,184,0.06);
+  transition: box-shadow 0.4s var(--ease);
+}
+#canvas-wrap:hover {
+  box-shadow: 0 4px 32px rgba(180,160,190,0.16),
+              0 0 50px rgba(232,168,184,0.10);
+}
+
+/* ── 预览画布 ── */
+#preview-wrap {
+  position: relative;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  padding: 2px;
+  background: linear-gradient(135deg,
+    rgba(240,200,215,0.7),
+    rgba(200,210,240,0.6));
+  box-shadow: 0 2px 18px rgba(180,160,190,0.10),
+              0 0 30px rgba(232,168,184,0.05);
+}
+
+#editor-canvas {
+  display: block;
+  width: 700px;
+  height: 700px;
+  image-rendering: auto;
+  border-radius: 13px;
+  background: #fff;
+}
+#preview-canvas {
+  display: block;
+  width: 350px;
+  height: 350px;
+  image-rendering: auto;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* ── 预览注释 ── */
+.preview-note {
+  font-size: 13px;
+  font-weight: 500;
+  color: #C88898;
+  text-align: center;
+  letter-spacing: 0.2px;
+  margin-top: 6px;
+}
+.preview-warn {
+  font-size: 12px;
+  color: #6B5B6B;
+  text-align: left;
+  line-height: 1.9;
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(255,240,245,0.5) 0%, rgba(245,240,252,0.5) 100%);
+  border: 1px solid rgba(220,190,200,0.3);
+  border-radius: var(--r-sm);
+  white-space: pre-line;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 1px 4px rgba(180,160,180,0.08);
+}
+.preview-warn b {
+  color: #C87080;
+  font-weight: 600;
+}
+
+/* ── 工具栏 ── */
+#toolbar {
+  display: flex;
+  gap: 14px;
+  flex-shrink: 0;
+  margin-bottom: auto;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ============================================================
+   Buttons — 圆润 Pill · 微发光渐变动效
+   ============================================================ */
+.btn {
+  padding: 10px 28px;
+  border: none;
+  border-radius: var(--r-pill);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.30s var(--ease);
+  font-family: var(--font);
+  letter-spacing: 0.3px;
+  position: relative;
+}
+
+/* 导出正方形图纸 — 粉色主按钮 */
+.btn-export {
+  background: linear-gradient(135deg, #F0C0D0, #E8A0B8);
+  color: #fff;
+  box-shadow: 0 3px 14px rgba(232,160,184,0.30);
+}
+.btn-export:hover {
+  background: linear-gradient(135deg, #F8D0DC, #F0B0C4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(232,160,184,0.42),
+              0 0 32px rgba(232,160,184,0.18);
+}
+.btn-export:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(232,160,184,0.25);
+}
+
+/* 预览区按钮 — 薄荷绿 */
+.btn-preview-export {
+  background: linear-gradient(135deg, #A8D8C8, #88C0A8);
+  color: #fff;
+  font-size: 12px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 500;
+  transition: all 0.30s var(--ease);
+  letter-spacing: 0.2px;
+  box-shadow: 0 2px 10px rgba(136,192,168,0.25);
+}
+.btn-preview-export:hover {
+  background: linear-gradient(135deg, #B8E8D8, #98D0B8);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 18px rgba(136,192,168,0.38),
+              0 0 28px rgba(136,192,168,0.15);
+}
+.btn-preview-export:active {
+  transform: translateY(0);
+}
+
+/* 恢复默认 — 幽灵按钮 */
+.btn-reset {
+  background: rgba(255,255,255,0.70);
+  color: var(--text-soft);
+  border: 1.5px solid #E0D8E8;
+  border-radius: var(--r-pill);
+}
+.btn-reset:hover {
+  background: #fff;
+  border-color: #D0C0D8;
+  box-shadow: 0 3px 14px rgba(180,160,190,0.14);
+  transform: translateY(-1px);
+}
+.btn-reset:active {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   Loading Overlay — 磨砂玻璃 · 梦幻加载
+   ============================================================ */
+#loading {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,246,250,0.78);
+  backdrop-filter: blur(30px) saturate(140%);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  gap: 18px;
+  transition: opacity 0.5s ease;
+}
+#loading.hidden { opacity: 0; pointer-events: none; }
+#loading .spinner {
+  width: 40px; height: 40px;
+  border: 2.5px solid rgba(232,168,184,0.10);
+  border-top-color: var(--pink);
+  border-radius: var(--r-full);
+  animation: spin 0.75s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#loading .load-text {
+  color: var(--text-soft);
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+#loading .progress-bar {
+  width: 200px;
+  height: 6px;
+  background: rgba(232,168,184,0.10);
+  border-radius: 3px;
+  overflow: hidden;
+}
+#loading .progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #F0C0D0, #E8A0B8, #C0C8F0);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+#loading .load-progress {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+#loading .load-tip {
+  color: #C88898;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  opacity: 0.85;
+}
+
+/* ============================================================
+   File Protocol Warning — 磨砂玻璃弹窗
+   ============================================================ */
+#file-warn {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(255,246,250,0.85);
+  backdrop-filter: blur(30px) saturate(140%);
+  -webkit-backdrop-filter: blur(30px) saturate(140%);
+  color: var(--text);
+  z-index: 200;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  font-family: var(--font);
+  line-height: 1.9;
+  letter-spacing: 0.4px;
+}
+#file-warn h2 {
+  font-size: 22px;
+  margin-bottom: 14px;
+  color: #D890A0;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+}
+#file-warn pre {
+  background: rgba(255,255,255,0.70);
+  padding: 16px 28px;
+  border-radius: var(--r-md);
+  margin: 14px 0;
+  font-size: 14px;
+  color: var(--text-soft);
+  border: 1px solid rgba(220,200,215,0.35);
+  font-family: 'SF Mono', 'JetBrains Mono', 'Consolas', monospace;
+  letter-spacing: 0;
+}
+#file-warn a {
+  color: var(--pink);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+#file-warn a:hover {
+  color: #D08098;
+}
+
+/* ── 桌面端可见，移动端隐藏 ── */
+.mobile-only { display: none; }
+
+/* ============================================================
+   Mobile Responsive — 移动端自适应
+   ============================================================ */
+@media (max-width: 900px) {
+  main { flex-direction: column; }
+
+  /* 移动端隐藏侧边面板 */
+  #panel { display: none; }
+
+  #canvas-area { padding: 12px 10px 56px; gap: 10px; flex: 1; }
+
+  /* 移动端隐藏编辑列 */
+  .editor-col { display: none; }
+
+  /* 预览画布撑大 */
+  #preview-canvas {
+    width: min(85vw, 420px);
+    height: min(85vw, 420px);
+    border-radius: 10px;
+  }
+
+  .canvases-row { gap: 0; margin-top: 0; justify-content: center; }
+  .canvas-col { gap: 7px; }
+  .canvas-label { font-size: 9px; letter-spacing: 1.5px; }
+
+  header { padding: 0 10px; gap: 4px; height: 42px; }
+  .nav-brand { font-size: 13px; }
+  header .badge { display: none; }
+  .nav-link { font-size: 10px; padding: 3px 8px; }
+
+  .preview-note { font-size: 11px; }
+  .preview-warn { font-size: 10px; padding: 8px 10px; }
+
+  #toolbar { gap: 10px; }
+  .btn { padding: 9px 20px; font-size: 13px; }
+  .btn-preview-export { padding: 7px 14px; font-size: 11px; }
+
+  #canvas-wrap { border-radius: 12px; }
+  #preview-wrap { border-radius: 8px; }
+
+  /* 移动端显示专用元素 */
+  .mobile-only { display: flex; }
+
+  /* ── 底部标签栏 ── */
+  #mobile-tabs {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 65;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-top: 1px solid rgba(220,200,215,0.30);
+    padding: 0;
+    display: flex;
+    gap: 0;
+  }
+  .mobile-tab {
+    flex: 1;
+    padding: 12px 0 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-soft);
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font);
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.2s var(--ease);
+    position: relative;
+  }
+  .mobile-tab.active {
+    color: var(--pink);
+    font-weight: 600;
+  }
+  .mobile-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--pink);
+  }
+
+  /* ── 抽屉遮罩（透明，不覆盖导航栏和底部标签栏） ── */
+  #mobile-drawer-overlay {
+    position: fixed;
+    top: var(--header-h);
+    right: 0;
+    bottom: 46px;
+    left: 0;
+    z-index: 60;
+    background: transparent;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    pointer-events: none;
+  }
+  #mobile-drawer-overlay:not(.hidden) {
+    pointer-events: auto;
+  }
+  #mobile-drawer-overlay.hidden { display: none; }
+
+  /* ── 抽屉面板 ── */
+  #mobile-drawer {
+    width: 100%;
+    max-height: 42vh;
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border-radius: var(--r-md) var(--r-md) 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 -4px 24px rgba(180,160,190,0.15);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #mobile-drawer-overlay:not(.hidden) #mobile-drawer {
+    transform: translateY(0);
+  }
+  #mobile-drawer-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: #D8C8D8;
+    margin: 10px auto 6px;
+    flex-shrink: 0;
+  }
+  #mobile-drawer-content {
+    overflow-y: auto;
+    flex: 1;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* 抽屉内复用 panel 样式，覆盖部分桌面端设定 */
+  #mobile-drawer-content .category {
+    border-bottom: 1px solid rgba(220,200,215,0.15);
+  }
+  #mobile-drawer-content .category-header {
+    font-size: 13px;
+    padding: 11px 18px;
+    position: static;
+  }
+  #mobile-drawer-content .category-body {
+    max-height: none;
+    overflow: visible;
+  }
+  #mobile-drawer-content .comp-row {
+    padding: 9px 18px;
+  }
+  #mobile-drawer-content .comp-name {
+    font-size: 12px;
+  }
+  #mobile-drawer-content .upload-section {
+    padding: 8px 18px;
+  }
+  #mobile-drawer-content .faq-block {
+    margin: 4px 12px 10px;
+    padding: 8px 12px;
+    font-size: 11px;
+  }
+
+  /* ── 浮动查看编辑图按钮 ── */
+  #mobile-editor-btn {
+    position: fixed;
+    right: 12px;
+    bottom: 62px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(220,200,215,0.4);
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #C88898;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 50;
+    box-shadow: 0 2px 12px rgba(180,160,190,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 0.25s var(--ease);
+  }
+  #mobile-editor-btn:active {
+    transform: scale(0.92);
+    background: rgba(232,168,184,0.15);
+  }
+
+  /* ── 编辑图弹窗 ── */
+  #editor-popup-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(90,74,94,0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  #editor-popup-overlay.hidden { display: none; }
+  #editor-popup {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #editor-popup-close {
+    position: absolute;
+    top: -32px;
+    right: 0;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    opacity: 0.8;
+  }
+  #editor-popup-close:active { opacity: 1; }
+}
+
+/* ── 小屏手机 ── */
+@media (max-width: 480px) {
+  #canvas-area { padding: 12px 6px; gap: 10px; }
+  .canvases-row { gap: 10px; }
+  #toolbar { gap: 6px; }
+  .btn { padding: 8px 16px; font-size: 12px; letter-spacing: 0.2px; }
+  .btn-preview-export { padding: 6px 12px; font-size: 10px; }
+}
+/* ── 首次访问警告弹窗 ── */
+#warn-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(90,74,94,0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+}
+#warn-overlay.hidden { display: none; }
+#warn-dialog {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-radius: var(--r-md);
+  border: 1px solid rgba(220,200,215,0.35);
+  padding: 32px 28px 24px;
+  max-width: 440px; width: 90%;
+  box-shadow: 0 8px 40px rgba(180,160,190,0.25);
+  max-height: 80vh; overflow-y: auto;
+  line-height: 1.8; font-size: 14px; color: var(--text);
+}
+#warn-dialog h3 {
+  font-size: 17px; font-weight: 600; color: #C88898;
+  margin-bottom: 16px; text-align: center; letter-spacing: 0.5px;
+}
+#warn-dialog ol { padding-left: 20px; margin-bottom: 4px; }
+#warn-dialog li {
+  margin-bottom: 5px; font-size: 13px; color: var(--text-soft); line-height: 1.7;
+}
+#warn-dialog .note { font-size: 12px; color: var(--text-muted); margin: 6px 0 6px 20px; }
+#warn-dialog .warn-footer { font-size: 12px; color: var(--text-muted); margin: 6px 0 6px 20px; }
+#warn-dialog .checkbox-row {
+  display: flex; align-items: center; gap: 8px;
+  margin: 18px 0 12px; font-size: 14px; color: var(--text);
+  cursor: pointer; user-select: none;
+}
+#warn-dialog .checkbox-row input { width: 18px; height: 18px; accent-color: var(--pink); cursor: pointer; }
+#warn-confirm {
+  display: block; width: 100%; padding: 10px; border: none;
+  border-radius: var(--r-pill);
+  background: linear-gradient(135deg, #E8A8B8, #D498A8);
+  color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+  letter-spacing: 0.5px; opacity: 0.45; pointer-events: none;
+  transition: all 0.3s var(--ease);
+}
+#warn-confirm.enabled { opacity: 1; pointer-events: auto; }
+#warn-confirm.enabled:hover { box-shadow: 0 4px 18px rgba(232,168,184,0.35); transform: translateY(-1px); }
+
+@media (max-width: 900px) {
+  #warn-dialog { padding: 24px 18px 18px; font-size: 13px; }
+  #warn-dialog h3 { font-size: 15px; }
+  #warn-dialog li { font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<!-- 首次访问警告弹窗 -->
+<div id="warn-overlay">
+  <div id="warn-dialog">
+    <h3>请仔细阅读并勾选我已知情并遵守</h3>
+    <ol>
+      <li>图纸模板来源于san-Ga老师的无偿分享。请尊重老师的劳动成果，严格遵守以下几点：</li>
+      <li>不管是本网站生成的图纸或是任何以san-Ga老师的努努体模板绘制的图纸，都不能以盈利本身为目的多次售卖同一图纸。且严厉禁止进行使用图纸找厂开团！</li>
+    </ol>
+    <p class="note">备注：本网页生成的预览图片请随意使用</p>
+    <ol start="3">
+      <li>手作娘本身使用本网站进行图纸自定义后进行少量成品掉落售卖可行，但不允许转卖盈利！</li>
+    </ol>
+    <p class="warn-footer">拒绝中间商赚差价从我做起( ｀д′)</p>
+    <ol start="4">
+      <li>图纸自定义使用范围禁止🐢🦐！！！！</li>
+      <li>有任何问题可以发邮件给wnn_1222@163.com联系作者</li>
+    </ol>
+    <label class="checkbox-row">
+      <input type="checkbox" id="warn-checkbox">
+      我已知情并遵守
+    </label>
+    <button id="warn-confirm">确认</button>
+  </div>
+</div>
+
+<!-- File protocol warning -->
+<div id="file-warn">
+  <h2>⚠️ 请使用本地服务器打开</h2>
+  <p>由于浏览器安全限制（Canvas 像素操作），无法通过 file:// 协议运行此页面。</p>
+  <p>请在项目目录打开终端，运行：</p>
+  <pre>python -m http.server 8080</pre>
+  <p>然后访问 <a href="http://localhost:8080" target="_blank">http://localhost:8080</a></p>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="load-text">少女祈祷中...</div>
+  <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill"></div></div>
+  <div class="load-progress" id="load-progress"></div>
+  <div class="load-tip">请注意阅读界面内文字哦</div>
+  <div class="load-tip" style="margin-top:4px;font-size:11px;opacity:0.7;">每次刷新需要加载半分钟左右，画布赶来中……</div>
+</div>
+
+<!-- Header -->
+<header>
+  <a href="index.html" class="nav-brand">努努梦工厂</a>
+  <nav class="header-nav">
+    <a href="index.html" class="nav-link active">DIY</a>
+    <a href="about.html" class="nav-link">关于作者</a>
+  </nav>
+</header>
+
+<!-- Main -->
+<main>
+  <aside id="panel"></aside>
+  <section id="canvas-area">
+    <div class="canvases-row">
+      <div class="canvas-col editor-col">
+        <span class="canvas-label">编辑</span>
+        <div id="canvas-wrap">
+          <canvas id="editor-canvas" width="700" height="700"></canvas>
+        </div>
+      </div>
+      <div class="canvas-col preview-col">
+        <span class="canvas-label">预览</span>
+        <div id="preview-wrap">
+          <canvas id="preview-canvas" width="350" height="350"></canvas>
+        </div>
+        <button class="btn btn-preview-export" id="btn-refresh-preview">刷新预览</button>
+        <button class="btn btn-preview-export" id="btn-preview-export">导出预览图</button>
+        <span class="preview-note">预览效果仅供参考，实际成品效果因人而异。</span>
+        <div class="preview-warn">1. 图纸模板来源于 san-Ga 老师的无偿分享，请尊重老师的劳动成果。
+2. 本网站生成的图纸及任何以 san-Ga 老师的努努体模板绘制的图纸，<b>严禁以盈利为目的多次售卖</b>，严厉禁止使用图纸找厂开团。
+    📌 本网页生成的预览图片可随意使用。
+3. 手作娘使用本网站进行图纸自定义后进行少量成品掉落售卖可行，但不允许转卖盈利。
+    拒绝中间商赚差价从我做起 ( ｀д′ )
+4. 图纸自定义使用范围<b>禁止🐢🦐</b>！！
+5. 有任何问题可联系 wnn_1222@163.com</div>
+      </div>
+    </div>
+    <div id="toolbar">
+      <button class="btn btn-export" id="btn-export">导出图纸</button>
+      <button class="btn btn-reset" id="btn-reset">↺ 恢复默认</button>
+    </div>
+  </section>
+</main>
+
+<!-- Mobile bottom tab bar -->
+<nav id="mobile-tabs" class="mobile-only">
+  <button class="mobile-tab active" data-cat="face">面部</button>
+  <button class="mobile-tab" data-cat="body">身体</button>
+  <button class="mobile-tab" data-cat="hair">发型</button>
+  <button class="mobile-tab" data-cat="bloodline">血线</button>
+</nav>
+
+<!-- Mobile category drawer -->
+<div id="mobile-drawer-overlay" class="mobile-only hidden">
+  <div id="mobile-drawer">
+    <div id="mobile-drawer-handle"></div>
+    <div id="mobile-drawer-content"></div>
+  </div>
+</div>
+
+<!-- Hidden file input for user image upload -->
+<input type="file" id="user-upload-input" accept="image/png" style="display:none">
+
+<!-- Mobile editor popup overlay -->
+<div id="editor-popup-overlay" class="mobile-only hidden">
+  <div id="editor-popup">
+    <button id="editor-popup-close">&times;</button>
+    <img id="editor-popup-img" alt="编辑图" style="max-width:90vw;max-height:70vh;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.15);">
+    <span style="display:block;font-size:11px;color:#B8A8C0;margin-top:10px;text-align:center;">长按图片即可保存</span>
+  </div>
+</div>
+<button id="mobile-editor-btn" class="mobile-only" title="查看编辑图">✎</button>
+
+<script>
+/* ============================================================
+   SECTION 1: CONFIGURATION DATA
+   ============================================================ */
+
+const CATEGORIES = [
+  { key: 'face',      label: '面部' },
+  { key: 'body',      label: '身体' },
+  { key: 'hair',      label: '发型' },
+  { key: 'bloodline', label: '血线' },
+];
+
+const COLOR_GROUPS = {
+  skin:             { label: '肤色',        default: '#FFD5B8' },
+  hair:             { label: '发色',        default: '#4A2C1A' },
+  eye_pupil_left:   { label: '左瞳孔色',    default: '#888888' },
+  eye_pupil_right:  { label: '右瞳孔色',    default: '#888888' },
+  eye_part_left:    { label: '左部件色',    default: '#333333' },
+  eye_part_right:   { label: '右部件色',    default: '#333333' },
+  eyebrow:          { label: '眉毛色',      default: '#4A3728' },
+  mouth:            { label: '口型色',      default: '#E88B8B' },
+  canvas_bg:        { label: '画布底色',    default: '#FFFFFF' },
+  blush:            { label: '腮红色',      default: '#E87878' },
+  eye_highlight:    { label: '高光色',      default: '#FFFFFF' },
+
+
+  bloodline_skin:   { label: '肤色血线色',  default: '#000000' },
+  bloodline_hair:   { label: '发色血线色',  default: '#000000' },
+  bloodline_back:   { label: '后发片血线色', default: '#000000' },
+};
+
+// Meta-flags used by the panel builder:
+//   panelHideColor   — don't show a color swatch (component follows shared color group)
+//   eyeSide          — 'left'|'right' for eye components (grouped into combined rows)
+
+const COMPONENTS = [
+  // ======================== 发型 (hair) ========================
+  // 发色打底放第一位：唯一显示发色色盘的组件
+  { id:'hair_base', name:'发色', category:'hair', layer:2, colorGroup:'hair', optional:false,    variants:[{ file:'images/hair_base_edit.png', label:'默认' }]},
+  { id:'ponytail', name:'特殊发型', category:'hair', layer:0, colorGroup:'hair', optional:true,    panelHideColor: true,
+    variants:[
+      { file:'images/hair_special_ponytail_edit1.png', label:'左侧单马尾' },
+      { file:'images/hair_special_ponytail_edit2.png', label:'右侧单马尾' },
+      { file:'images/hair_special_ponytail_edit3.png', label:'脑后高马尾' },
+      { file:'images/hair_special_ponytail_edit4.png', label:'两侧双马尾' },
+      { file:'images/hair_special_ponytail_edit5.png', label:'特殊发型5' },
+      { file:'images/hair_special_ponytail_edit6.png', label:'特殊发型6' },
+      { file:'images/hair_special_ponytail_edit7.png', label:'特殊发型7' },
+    ]},
+  { id:'hair_back', name:'后发片', category:'hair', layer:1, colorGroup:'hair', optional:true,    panelHideColor: true,
+    variants:[
+      { file:'images/hair_back_edit1.png', label:'长发' },
+      { file:'images/hair_back_edit2.png', label:'短发' },
+      { file:'images/hair_back_edit3.png', label:'后发3' },
+      { file:'images/hair_back_edit4.png', label:'后发4' },
+    ]},
+  { id:'wolftail', name:'狼尾', category:'hair', layer:1, colorGroup:'hair', optional:true,    panelHideColor: true,
+    variants:[
+      { file:'images/hair_special_wolftail_edit.png', label:'狼尾' },
+    ]},
+  { id:'chest_hair', name:'胸前发', category:'hair', layer:7, colorGroup:'hair', optional:true,    panelHideColor: true,
+    variants:[{ file:'images/hair_special_chest_edit.png', label:'默认' }]},
+  { id:'hair_front_base', name:'前发打底', category:'hair', layer:8, colorGroup:'hair', optional:true,    panelHideColor: true, flippable: true, flipAxis: 0.575, previewPositionable: true,
+    variants:[
+      { file:'images/hair_front_base_edit1.png', label:'短鬓角' },
+      { file:'images/hair_front_base_edit2.png', label:'长鬓角' },
+      { file:'images/hair_front_base_edit3.png', label:'前发底3' },
+      { file:'images/hair_front_base_edit4.png', label:'前发底4' },
+      { file:'images/hair_front_base_edit5.png', label:'前发底5' },
+      { file:'images/hair_front_base_edit6.png', label:'前发底6' },
+      { file:'images/hair_front_base_edit7.png', label:'前发底7' },
+      { file:'images/hair_front_base_edit8.png', label:'前发底8' },
+      { file:'images/hair_front_base_edit9.png', label:'前发底9' },
+      { file:'images/hair_front_base_edit10.png', label:'前发底10' },
+      { file:'images/hair_front_base_edit11.png', label:'前发底11' },
+      { file:'images/hair_front_base_edit12.png', label:'前发底12' },
+      { file:'images/hair_front_base_edit13.png', label:'前发底13' },
+      { file:'images/hair_front_base_edit14.png', label:'前发底14' },
+      { file:'images/hair_front_base_edit15.png', label:'前发底15' },
+    ]},
+  { id:'hair_front_strands', name:'前发发片', category:'hair', layer:9, colorGroup:'hair', optional:true,    panelHideColor: true, flippable: true, flipAxis: 0.14, previewPositionable: true,
+    variants:[
+      { file:'images/hair_front_strands_edit1.png', label:'尖刘海' },
+      { file:'images/hair_front_strands_edit2.png', label:'M刘海' },
+      { file:'images/hair_front_strands_edit3.png', label:'发片3' },
+      { file:'images/hair_front_strands_edit4.png', label:'发片4' },
+      { file:'images/hair_front_strands_edit5.png', label:'发片5' },
+      { file:'images/hair_front_strands_edit6.png', label:'发片6' },
+      { file:'images/hair_front_strands_edit7.png', label:'发片7' },
+      { file:'images/hair_front_strands_edit8.png', label:'发片8' },
+      { file:'images/hair_front_strands_edit9.png', label:'发片9' },
+      { file:'images/hair_front_strands_edit10.png', label:'发片10' },
+      { file:'images/hair_front_strands_edit11.png', label:'发片11' },
+      { file:'images/hair_front_strands_edit12.png', label:'发片12' },
+      { file:'images/hair_front_strands_edit13.png', label:'发片13' },
+      { file:'images/hair_front_strands_edit14.png', label:'发片14' },
+      { file:'images/hair_front_strands_edit15.png', label:'发片15' },
+      { file:'images/hair_front_strands_edit16.png', label:'发片16' },
+    ]},
+
+  // ======================== 身体 (body) ========================
+  { id:'skin_body', name:'肤色', category:'body', layer:2, colorGroup:'skin', optional:false,    variants:[{ file:'images/skin_body_edit.png', label:'默认' }]},
+  { id:'clothing_bottom', name:'下衣', category:'body', layer:5, colorGroup:null, optional:true,    variants:[{ file:'images/clothing_bottom_edit.png', label:'默认' }]},
+  { id:'clothing_top', name:'上衣', category:'body', layer:6, colorGroup:null, optional:true,    variants:[{ file:'images/clothing_top_edit.png', label:'默认' }]},
+
+  // ======================== 脸部 (face) ========================
+  // Eye components share 'eye_left'/'eye_right' color groups;
+  // the panel combines pupil+part into one row per side.
+  { id:'eyebrow', name:'眉毛', category:'face', layer:3, colorGroup:'eyebrow', optional:false, positionable:true, variants:[
+      { file:'images/face_eyebrow_edit1.png', label:'眉毛1' },
+      { file:'images/face_eyebrow_edit2.png', label:'眉毛2' },
+      { file:'images/face_eyebrow_edit3.png', label:'眉毛3' },
+      { file:'images/face_eyebrow_edit4.png', label:'眉毛4' },
+      { file:'images/face_eyebrow_edit5.png', label:'眉毛5' },
+      { file:'images/face_eyebrow_edit6.png', label:'眉毛6' },
+    ]},
+  { id:'mouth', name:'口型', category:'face', layer:3, colorGroup:'mouth', optional:false,    variants:[
+      { file:'images/face_mouth_edit1.png', label:'口型1' },
+      { file:'images/face_mouth_edit2.png', label:'口型2' },
+      { file:'images/face_mouth_edit3.png', label:'口型3' },
+      { file:'images/face_mouth_edit4.png', label:'口型4' },
+      { file:'images/face_mouth_edit5.png', label:'口型5' },
+      { file:'images/face_mouth_edit6.png', label:'口型6' },
+      { file:'images/face_mouth_edit7.png', label:'口型7' },
+      { file:'images/face_mouth_edit8.png', label:'口型8' },
+      { file:'images/face_mouth_edit9.png', label:'口型9' },
+    ]},
+  { id:'blush', name:'腮红', category:'face', layer:3, colorGroup:'blush', optional:false,    variants:[
+      { file:'images/face_blush_edit1.png', label:'腮红1' },
+      { file:'images/face_blush_edit2.png', label:'腮红2' },
+      { file:'images/face_blush_edit3.png', label:'腮红3' },
+      { file:'images/face_blush_edit4.png', label:'腮红4' },
+    ]},
+  { id:'eye_pupil_left',  name:'左瞳孔', category:'face', layer:4, colorGroup:'eye_pupil_left',  optional:true, eyeSide:'left', variants:[{ file:'images/face_eye_left_pupil_edit1.png', label:'瞳孔1' },{ file:'images/face_eye_left_pupil_edit2.png', label:'瞳孔2' },{ file:'images/face_eye_left_pupil_edit3.png', label:'瞳孔3' },{ file:'images/face_eye_left_pupil_edit4.png', label:'瞳孔4' }]},
+  { id:'eye_part_left',   name:'左部件', category:'face', layer:3, colorGroup:'eye_part_left',   optional:false, eyeSide:'left',  variants:[{ file:'images/face_eye_left_part_edit1.png', label:'部件1' },{ file:'images/face_eye_left_part_edit2.png', label:'部件2' },{ file:'images/face_eye_left_part_edit3.png', label:'部件3' },{ file:'images/face_eye_left_part_edit4.png', label:'部件4' },{ file:'images/face_eye_left_part_edit5.png', label:'部件5' },{ file:'images/face_eye_left_part_edit6.png', label:'部件6' },{ file:'images/face_eye_left_part_edit7.png', label:'部件7' },{ file:'images/face_eye_left_part_edit8.png', label:'部件8' }]},
+  { id:'eye_pupil_right', name:'右瞳孔', category:'face', layer:4, colorGroup:'eye_pupil_right', optional:true, eyeSide:'right', linkedColorGroup:'eye_pupil_left', variants:[{ file:'images/face_eye_right_pupil_edit1.png', label:'瞳孔1' },{ file:'images/face_eye_right_pupil_edit2.png', label:'瞳孔2' },{ file:'images/face_eye_right_pupil_edit3.png', label:'瞳孔3' },{ file:'images/face_eye_right_pupil_edit4.png', label:'瞳孔4' }]},
+  { id:'eye_part_right',  name:'右部件', category:'face', layer:3, colorGroup:'eye_part_right',  optional:false, eyeSide:'right', linkedColorGroup:'eye_part_left',  variants:[{ file:'images/face_eye_right_part_edit1.png', label:'部件1' },{ file:'images/face_eye_right_part_edit2.png', label:'部件2' },{ file:'images/face_eye_right_part_edit3.png', label:'部件3' },{ file:'images/face_eye_right_part_edit4.png', label:'部件4' },{ file:'images/face_eye_right_part_edit5.png', label:'部件5' },{ file:'images/face_eye_right_part_edit6.png', label:'部件6' },{ file:'images/face_eye_right_part_edit7.png', label:'部件7' },{ file:'images/face_eye_right_part_edit8.png', label:'部件8' }]},
+  { id:'eye_highlight_left', name:'左眼高光', category:'face', layer:5, colorGroup:'eye_highlight', optional:true, halfSide:'left', variants:[
+      { file:'images/face_eye_highlight_edit1.png', label:'高光1' },
+      { file:'images/face_eye_highlight_edit2.png', label:'高光2' },
+      { file:'images/face_eye_highlight_edit3.png', label:'高光3' },
+      { file:'images/face_eye_highlight_edit4.png', label:'高光4' },
+      { file:'images/face_eye_highlight_edit5.png', label:'高光5' },
+      { file:'images/face_eye_highlight_edit6.png', label:'高光6' },
+    ]},
+  { id:'eye_highlight_right', name:'右眼高光', category:'face', layer:5, colorGroup:'eye_highlight', optional:true, halfSide:'right', panelHideColor:true, variants:[
+      { file:'images/face_eye_highlight_edit1.png', label:'高光1' },
+      { file:'images/face_eye_highlight_edit2.png', label:'高光2' },
+      { file:'images/face_eye_highlight_edit3.png', label:'高光3' },
+      { file:'images/face_eye_highlight_edit4.png', label:'高光4' },
+      { file:'images/face_eye_highlight_edit5.png', label:'高光5' },
+      { file:'images/face_eye_highlight_edit6.png', label:'高光6' },
+    ]},
+
+  // ======================== 血线 (bloodline) ========================
+  { id:'bloodline_skin', name:'肤色血线', category:'bloodline', layer:10, colorGroup:'bloodline_skin', optional:false,    variants:[{ file:'images/bloodline_skin.png', label:'默认' }]},
+  { id:'bloodline_hair', name:'发色血线', category:'bloodline', layer:10, colorGroup:'bloodline_hair', optional:false,    variants:[{ file:'images/bloodline_hair.png', label:'默认' }]},
+  { id:'bloodline_back', name:'后发片血线', category:'bloodline', layer:10, colorGroup:'bloodline_back', optional:true,    variants:[{ file:'images/hair_back_bloodline.png', label:'默认' }]},
+
+  // ======================== 隐藏 (hidden) ========================
+  { id:'skin_face', name:'肤色脸部', category:'hidden', layer:2, colorGroup:'skin', optional:false, hidden:true,
+    variants:[{ file:'images/skin_face_edit.png', label:'默认' }]},
+  { id:'hair_hairline', name:'发际线', category:'hidden', layer:2, colorGroup:'hair', optional:false, hidden:true,
+    variants:[{ file:'images/hair_hairline_edit.png', label:'默认' }]},
+];
+
+const SORTED = [...COMPONENTS].sort((a, b) => a.layer - b.layer);
+const EDIT_SIZE = 700;
+const EXPORT_SIZE = 4134;
+const PREVIEW_DISPLAY_SIZE = 350;
+const PREVIEW_EXPORT_SIZE = 2000;
+
+// Hardcoded crop for eye_highlight: content bounding box in source image,
+// split at midpoint for left/right eye. (680,2635)–(1328,2809), midX=1004
+const EYE_HL_CROP = { x: 680, y: 2635, w: 648, h: 174, midX: 1004 };
+
+// Preview overrides: dedicated preview images for the preview canvas.
+// Components not listed here reuse the editor image and default offset (0,0).
+// Use `file` for single-variant components, `variants` for multi-variant.
+// `previewZ` controls base-layer stacking order (lower = drawn first = behind).
+const PREVIEW_OVERRIDES = {
+  chest_hair:     { file: 'images/preview/hair_special_chest_preview.png',     previewZ: 0,  shadow: { blur: 5, offsetX: 1, offsetY: 2, color: 'rgba(0,0,0,0.4)' } },
+  skin_face:      { file: 'images/preview/skin_face_preview.png',              previewZ: 1 },
+  hair_hairline:  { file: 'images/preview/hair_hairline_preview.png',         previewZ: 2 },
+  wolftail:       { file: 'images/preview/hair_special_wolftail_preview.png',  previewZ: 0,  shadow: { blur: 5, offsetX: 1, offsetY: 2, color: 'rgba(0,0,0,0.4)' } },
+  ponytail:       { variants: [
+    'images/preview/hair_special_ponytail_preview1.png',
+    'images/preview/hair_special_ponytail_preview2.png',
+    'images/preview/hair_special_ponytail_preview3.png',
+    'images/preview/hair_special_ponytail_preview4.png',
+    'images/preview/hair_special_ponytail_preview5.png',
+    'images/preview/hair_special_ponytail_preview6.png',
+    'images/preview/hair_special_ponytail_preview7.png',
+  ], previewZ: 0,  shadow: { blur: 5, offsetX: 1, offsetY: 2, color: 'rgba(0,0,0,0.4)' } },
+  hair_back:      { variants: [
+    'images/preview/hair_back_preview1.png',
+    'images/preview/hair_back_preview2.png',
+    'images/preview/hair_back_preview3.png',
+    'images/preview/hair_back_preview4.png',
+  ], previewZ: -1, shadow: { blur: 5, offsetX: 1, offsetY: 2, color: 'rgba(0,0,0,0.4)' } },
+};
+
+// Preview overlay crop regions (full-res 4134×4134 coords).
+// Each entry composites a layer range, crops a rect, and overlays on preview & export.
+// offsetX/Y: shift from centre as fraction of canvas (e.g. 0.02 = 2%).
+const PREVIEW_CROPS = [
+  // Layers 3–5: face features (eyes, brows, mouth, blush, highlight)
+  { layers: [3, 5], x: 548, y: 2160, w: 1043, h: 820, offsetX: 0.015, offsetY: -0.04 },
+  // Layer 8: front hair base (前发打底) — with shadow
+  { layers: [8, 8], x: 1692, y: 3000, w: 1317, h: 1131, offsetX: -0.003, offsetY: -0.08,
+    shadow: { blur: 5, offsetX: 1, offsetY: 2, color: 'rgba(0,0,0,0.4)' } },
+  // Layer 9: front hair strands (前发发片) — with shadow
+  { layers: [9, 9], x: 0, y: 2980, w: 1154, h: 1154, offsetX: 0.005, offsetY: -0.17,
+    shadow: { blur: 5, offsetX: 1, offsetY: 2, color: 'rgba(0,0,0,0.4)' } },
+];
+
+// Hot color groups: shared by 3+ components — keep original image in memory
+// to avoid repeated PNG decode during color drag (e.g. hair = 8 components).
+const HOT_COLOR_GROUPS = new Set();
+(function() {
+  const counts = {};
+  for (const comp of COMPONENTS) {
+    if (comp.colorGroup) {
+      counts[comp.colorGroup] = (counts[comp.colorGroup] || 0) + 1;
+    }
+  }
+  for (const [group, count] of Object.entries(counts)) {
+    if (count >= 3) HOT_COLOR_GROUPS.add(group);
+  }
+})();
+
+/* ============================================================
+   SECTION 2: APPLICATION STATE
+   ============================================================ */
+
+let uploadIdCounter = 0;
+const eyeOpen = new Set(); // track which eye rows are expanded across rebuilds
+
+const state = {
+  heterochromia: false,
+  previewHairLayerSwapped: false,  // swap layer 8↔9 in preview overlay
+  colorGroups: {},   // { groupKey: { color: '#XXXXXX' } }
+  components: {},    // { compId: { visible, currentVariant, offsetX, offsetY, originalImage, editCache, loaded } }
+  userUploads: [],   // { id, name, image:Image, cache:Canvas, offsetX, offsetY }
+  dirty: false,
+  renderScheduled: false,
+};
+
+// Initialize color group state from config
+for (const [key, cfg] of Object.entries(COLOR_GROUPS)) {
+  state.colorGroups[key] = { color: cfg.default };
+}
+
+// Initialize component state from config
+for (const comp of COMPONENTS) {
+  state.components[comp.id] = {
+    visible: true,
+    currentVariant: 0,
+    offsetX: 0,
+    offsetY: 0,
+    originalImage: null,
+    imageUrl: null,
+    editCache: null,
+    loaded: false,
+    dirty: false,         // true = needs recolor before next editor render
+    previewCache: null,   // cached preview canvas at PREVIEW_DISPLAY_SIZE
+    previewDirty: false,  // true = needs preview cache rebuild
+    flipped: false,       // mirror flip for applicable components
+    previewOffsetY: 0,    // preview Y offset fraction (for previewPositionable)
+  };
+}
+
+/* ============================================================
+   SECTION 4: COLOR RESOLUTION
+   ============================================================ */
+
+/** Get the effective color for a component, accounting for heterochromia linking. */
+function getEffectiveColor(comp) {
+  if (!comp.colorGroup) return null;
+  // When heterochromia is OFF, linked components follow their source
+  if (comp.linkedColorGroup && !state.heterochromia) {
+    return state.colorGroups[comp.linkedColorGroup].color;
+  }
+  return state.colorGroups[comp.colorGroup].color;
+}
+
+/** Check if a component is currently linked (disabled color picker). */
+function isLinked(comp) {
+  return comp.linkedColorGroup && !state.heterochromia;
+}
+
+/** Get the component whose color this linked component follows. */
+function getLinkSource(comp) {
+  if (!comp.linkedColorGroup) return null;
+  return COMPONENTS.find(c => c.colorGroup === comp.linkedColorGroup);
+}
+
+/* ============================================================
+   SECTION 5: CACHE BUILDING
+   ============================================================ */
+
+/**
+ * Build the edit cache for a component:
+ * 1. Load original image (or reuse cached one)
+ * 2. Scale to fit EDIT_SIZE
+ * 3. Apply multiply if colorable
+ * Returns the cache canvas.
+ *
+ * After building, the original Image is released to save memory.
+ * It will be reloaded on demand for recolor / export (browser cache
+ * makes reload nearly instant).
+ */
+async function buildEditCache(comp, keepOriginal) {
+  const cs = state.components[comp.id];
+
+  // Reload image if it was freed (lazy-load optimization)
+  let img = cs.originalImage;
+  if (!img && cs.imageUrl) {
+    try {
+      img = await loadImage(cs.imageUrl);
+    } catch (err) {
+      console.error(`重新加载图片失败: ${comp.name}`, err);
+      return null;
+    }
+  }
+  if (!img) return null;
+
+  const fitScale = EDIT_SIZE / Math.max(img.naturalWidth, img.naturalHeight);
+  const w = Math.round(img.naturalWidth * fitScale);
+  const h = Math.round(img.naturalHeight * fitScale);
+
+  // Plan B: reuse existing editCache canvas when dimensions match,
+  // avoiding per-frame canvas allocation + GC churn during color drag.
+  let cvs = cs.editCache;
+  if (cvs && cvs.width === w && cvs.height === h) {
+    // Reuse — just clear (resetting compositeOperation to default)
+    const ctx = cvs.getContext('2d');
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, w, h);
+  } else {
+    cvs = document.createElement('canvas');
+    cvs.width = w;
+    cvs.height = h;
+  }
+  const ctx = cvs.getContext('2d');
+
+  // Mirror flip transform
+  const doFlip = comp.flippable && cs.flipped;
+  if (doFlip) { const ax = 2 * w * (comp.flipAxis || 0.5); ctx.save(); ctx.translate(ax, 0); ctx.scale(-1, 1); }
+
+  const color = getEffectiveColor(comp);
+  const nw = img.naturalWidth;
+  const nh = img.naturalHeight;
+
+  const drawHalf = (ctxObj, targetImg) => {
+    const C = EYE_HL_CROP;
+    if (comp.halfSide === 'left') {
+      const sw = C.midX - C.x;
+      ctxObj.drawImage(targetImg,
+        C.x, C.y, sw, C.h,
+        Math.round(C.x / nw * w), Math.round(C.y / nh * h),
+        Math.round(sw / nw * w), Math.round(C.h / nh * h));
+    } else {
+      const sw = (C.x + C.w) - C.midX;
+      ctxObj.drawImage(targetImg,
+        C.midX, C.y, sw, C.h,
+        Math.round(C.midX / nw * w), Math.round(C.y / nh * h),
+        Math.round(sw / nw * w), Math.round(C.h / nh * h));
+    }
+  };
+
+  if (color) {
+    if (comp.halfSide) {
+      drawHalf(ctx, img);
+    } else {
+      ctx.drawImage(img, 0, 0, w, h);
+    }
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'destination-in';
+    if (comp.halfSide) {
+      drawHalf(ctx, img);
+    } else {
+      ctx.drawImage(img, 0, 0, w, h);
+    }
+    cs.editCache = cvs;
+  } else {
+    if (comp.halfSide) {
+      drawHalf(ctx, img);
+    } else {
+      ctx.drawImage(img, 0, 0, w, h);
+    }
+    cs.editCache = cvs;
+  }
+
+  if (doFlip) { ctx.restore(); }
+
+  // Plan A: hot color groups (3+ components sharing a group, e.g. hair=8)
+  // keep originalImage in memory to avoid repeated PNG→bitmap decode.
+  const isHot = comp.colorGroup && HOT_COLOR_GROUPS.has(comp.colorGroup);
+
+  // Free original image unless caller or hot-group logic wants to keep it
+  if (!keepOriginal && !isHot) {
+    cs.originalImage = null;
+  }
+
+  return cs.editCache;
+}
+
+/* ============================================================
+   SECTION 5b: PREVIEW CACHE BUILDING
+   ============================================================ */
+
+/** Get the preview image file for a component (override or editor fallback). */
+function getPreviewFile(comp) {
+  const override = PREVIEW_OVERRIDES[comp.id];
+  if (override) {
+    if (override.variants) {
+      const idx = state.components[comp.id].currentVariant;
+      if (idx < override.variants.length) return override.variants[idx];
+    }
+    if (override.file) return override.file;
+  }
+  return comp.variants[state.components[comp.id].currentVariant]?.file || null;
+}
+
+/** Get preview offset for a component. */
+function getPreviewOffset(comp) {
+  const override = PREVIEW_OVERRIDES[comp.id];
+  return {
+    x: override ? (override.offsetX || 0) : 0,
+    y: override ? (override.offsetY || 0) : 0,
+  };
+}
+
+/**
+ * Build the preview cache for a component at PREVIEW_DISPLAY_SIZE.
+ * Loads preview image, scales, applies multiply if colorable.
+ * Only used for dedicated preview images (skin_face, hair_hairline).
+ */
+async function buildPreviewCache(comp) {
+  const cs = state.components[comp.id];
+  const file = getPreviewFile(comp);
+  if (!file) return null;
+
+  let img;
+  try {
+    img = await loadImage(file);
+  } catch (err) {
+    console.error(`预览加载失败: ${comp.name}`, err);
+    return null;
+  }
+
+  const fitScale = PREVIEW_DISPLAY_SIZE / Math.max(img.naturalWidth, img.naturalHeight);
+  const w = Math.round(img.naturalWidth * fitScale);
+  const h = Math.round(img.naturalHeight * fitScale);
+
+  // Reuse existing preview cache canvas when dimensions match
+  let cvs = cs.previewCache;
+  if (cvs && cvs.width === w && cvs.height === h) {
+    const ctx = cvs.getContext('2d');
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, w, h);
+  } else {
+    cvs = document.createElement('canvas');
+    cvs.width = w;
+    cvs.height = h;
+  }
+  const ctx = cvs.getContext('2d');
+
+  const color = getEffectiveColor(comp);
+  if (color) {
+    ctx.drawImage(img, 0, 0, w, h);
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.drawImage(img, 0, 0, w, h);
+  } else {
+    ctx.drawImage(img, 0, 0, w, h);
+  }
+
+  cs.previewCache = cvs;
+  return cvs;
+}
+
+/* ── Preview rendering ──────────────────────────────────── */
+
+/** Render base preview layers: all components with dedicated preview images, in layer order. */
+function renderPreviewBase() {
+  const pCanvas = document.getElementById('preview-canvas');
+  const pCtx = pCanvas.getContext('2d');
+  pCtx.fillStyle = '#FFFFFF';
+  pCtx.fillRect(0, 0, PREVIEW_DISPLAY_SIZE, PREVIEW_DISPLAY_SIZE);
+
+  const previewComps = SORTED.filter(c => PREVIEW_OVERRIDES[c.id])
+    .sort((a, b) => (PREVIEW_OVERRIDES[a.id].previewZ || 0) - (PREVIEW_OVERRIDES[b.id].previewZ || 0));
+  for (const comp of previewComps) {
+    const cs = state.components[comp.id];
+    if (!cs || !cs.visible || !cs.previewCache) continue;
+    const override = PREVIEW_OVERRIDES[comp.id];
+    const cache = cs.previewCache;
+    const off = getPreviewOffset(comp);
+    const x = (PREVIEW_DISPLAY_SIZE - cache.width) / 2 + off.x;
+    const y = (PREVIEW_DISPLAY_SIZE - cache.height) / 2 + off.y;
+    if (override.shadow) {
+      pCtx.shadowColor = override.shadow.color;
+      pCtx.shadowBlur = override.shadow.blur;
+      pCtx.shadowOffsetX = override.shadow.offsetX;
+      pCtx.shadowOffsetY = override.shadow.offsetY;
+    }
+    pCtx.drawImage(cache, x, y);
+    if (override.shadow) {
+      pCtx.shadowColor = 'transparent';
+      pCtx.shadowBlur = 0;
+      pCtx.shadowOffsetX = 0;
+      pCtx.shadowOffsetY = 0;
+    }
+  }
+}
+
+/**
+ * Get PREVIEW_CROPS entries in effective render order,
+ * honoring previewHairLayerSwapped (layers 8 ↔ 9).
+ */
+function getEffectivePreviewCrops() {
+  if (!state.previewHairLayerSwapped) return PREVIEW_CROPS;
+  // Swap the entire entries for layer 8 and layer 9,
+  // preserving each entry's own crop coordinates.
+  const result = [...PREVIEW_CROPS];
+  const idx8 = result.findIndex(c => c.layers[0] === 8 && c.layers[1] === 8);
+  const idx9 = result.findIndex(c => c.layers[0] === 9 && c.layers[1] === 9);
+  if (idx8 >= 0 && idx9 >= 0) {
+    [result[idx8], result[idx9]] = [result[idx9], result[idx8]];
+  }
+  return result;
+}
+
+/**
+ * Overlay cropped layer ranges onto the preview.
+ * Each entry in PREVIEW_CROPS composites its layer range, crops the rect,
+ * and draws 1:1 (edit-scale → preview) at the configured offset.
+ */
+function renderPreviewOverlay() {
+  const pCanvas = document.getElementById('preview-canvas');
+  const pCtx = pCanvas.getContext('2d');
+  const s = EDIT_SIZE / 4134;
+  const temp = document.createElement('canvas');
+
+  for (const crop of getEffectivePreviewCrops()) {
+    const [layerMin, layerMax] = crop.layers;
+
+    // 1. Composite the layer range onto temp canvas
+    temp.width = EDIT_SIZE;
+    temp.height = EDIT_SIZE;
+    const tCtx = temp.getContext('2d');
+
+    for (const comp of SORTED) {
+      if (comp.layer < layerMin || comp.layer > layerMax) continue;
+      const cs = state.components[comp.id];
+      if (!cs || !cs.visible || !cs.editCache) continue;
+      const cache = cs.editCache;
+      const x = (EDIT_SIZE - cache.width) / 2 + cs.offsetX;
+      const y = (EDIT_SIZE - cache.height) / 2 + cs.offsetY;
+      tCtx.drawImage(cache, x, y);
+    }
+
+    // 2. Crop the rectangle (full-res → edit-scale coords)
+    const sx = Math.round(crop.x * s);
+    const sy = Math.round(crop.y * s);
+    const sw = Math.round(crop.w * s);
+    const sh = Math.round(crop.h * s);
+
+    // 3. Apply shadow if configured
+    if (crop.shadow) {
+      pCtx.shadowColor = crop.shadow.color;
+      pCtx.shadowBlur = crop.shadow.blur;
+      pCtx.shadowOffsetX = crop.shadow.offsetX;
+      pCtx.shadowOffsetY = crop.shadow.offsetY;
+    }
+
+    // 4. Add preview position offset from components with previewPositionable
+    let extraOffY = 0;
+    for (const comp of SORTED) {
+      if (comp.layer >= layerMin && comp.layer <= layerMax && comp.previewPositionable) {
+        extraOffY = (state.components[comp.id]?.previewOffsetY || 0) * PREVIEW_DISPLAY_SIZE;
+        break;
+      }
+    }
+
+    // 5. Draw 1:1 on preview (edit-scale, no further shrink)
+    const dx = Math.round((PREVIEW_DISPLAY_SIZE - sw) / 2 + crop.offsetX * PREVIEW_DISPLAY_SIZE);
+    const dy = Math.round((PREVIEW_DISPLAY_SIZE - sh) / 2 + crop.offsetY * PREVIEW_DISPLAY_SIZE + extraOffY);
+    pCtx.drawImage(temp, sx, sy, sw, sh, dx, dy, sw, sh);
+
+    // Reset shadow
+    if (crop.shadow) {
+      pCtx.shadowColor = 'transparent';
+      pCtx.shadowBlur = 0;
+      pCtx.shadowOffsetX = 0;
+      pCtx.shadowOffsetY = 0;
+    }
+  }
+}
+
+/** Full preview refresh: rebuild stale caches, then render base + overlay. */
+async function refreshPreview() {
+  // Rebuild stale dedicated preview caches for all PREVIEW_OVERRIDES components
+  const tasks = [];
+  for (const comp of COMPONENTS) {
+    if (!PREVIEW_OVERRIDES[comp.id]) continue;
+    const cs = state.components[comp.id];
+    if (cs.previewDirty && cs.visible) {
+      tasks.push(
+        buildPreviewCache(comp).then(() => { cs.previewDirty = false; })
+      );
+    }
+  }
+  if (tasks.length > 0) await Promise.all(tasks);
+
+  renderPreviewBase();
+  renderPreviewOverlay();
+}
+
+/* ============================================================
+   SECTION 5c: THUMBNAIL GENERATION
+   ============================================================ */
+
+/**
+ * Generate a small thumbnail for a component variant.
+ * 1. Load the image (comes from browser cache after initial load)
+ * 2. Scan alpha channel to find non-transparent bounding box
+ * 3. Crop, apply default color via multiply, draw on white background
+ * 4. Return a blob URL for use as <img> src
+ *
+ * Results are cached in cs.thumbnailBlobs[variantIdx].
+ */
+async function generateThumbnail(comp, variantIdx) {
+  const cs = state.components[comp.id];
+  const variant = comp.variants[variantIdx];
+  if (!variant) return null;
+
+  // Thumbnail-only file override: left part variant 4 uses right part image
+  const thumbFile = (comp.id === 'eye_part_left' && variantIdx === 3)
+    ? 'images/face_eye_right_part_edit4.png'
+    : variant.file;
+
+  let img;
+  try {
+    img = await loadImage(thumbFile);
+  } catch (err) {
+    console.error(`缩略图加载失败: ${comp.name}`, err);
+    return null;
+  }
+
+  const FULL_W = img.naturalWidth;
+  const FULL_H = img.naturalHeight;
+
+  // Scale down for alpha scanning (400px — balances accuracy vs scan cost)
+  const ANALYZE_MAX = 400;
+  const analyzeScale = ANALYZE_MAX / Math.max(FULL_W, FULL_H);
+  const aw = Math.max(1, Math.round(FULL_W * analyzeScale));
+  const ah = Math.max(1, Math.round(FULL_H * analyzeScale));
+
+  const tmp = document.createElement('canvas');
+  tmp.width = aw;
+  tmp.height = ah;
+  const tctx = tmp.getContext('2d');
+  tctx.drawImage(img, 0, 0, aw, ah);
+
+  const THUMB_H = 32; // fixed height, proportional width (matches button)
+  const isLightContent = comp.colorGroup === 'eye_highlight'; // white content needs dark bg
+  const thumbBg = isLightContent ? '#3a3a3a' : '#fff';
+
+  let cropX, cropY, cropW, cropH;
+  let found = false;
+
+  if (comp.halfSide) {
+    // Full-image content detection → split bounding box vertically at midpoint.
+    // Left component gets the left half of the content, right gets the right half.
+    const imageData = tctx.getImageData(0, 0, aw, ah);
+    const data = imageData.data;
+    let cx = aw, cy = ah, mx = 0, my = 0;
+    const THRESHOLD = 5;
+    for (let y = 0; y < ah; y++) {
+      for (let x = 0; x < aw; x++) {
+        if (data[(y * aw + x) * 4 + 3] > THRESHOLD) {
+          if (x < cx) cx = x; if (x > mx) mx = x;
+          if (y < cy) cy = y; if (y > my) my = y;
+          found = true;
+        }
+      }
+    }
+    if (found) {
+      const midX = Math.round((cx + mx) / 2);
+      let cMinX, cMaxX;
+      if (comp.halfSide === 'left') {
+        cMinX = cx; cMaxX = midX;
+      } else {
+        cMinX = midX; cMaxX = mx;
+      }
+      const cw = cMaxX - cMinX + 1;
+      const ch = my - cy + 1;
+      const padX = Math.round(cw * 0.05);
+      const padY = Math.round(ch * 0.05);
+      cMinX = Math.max(0, cMinX - padX);
+      cy = Math.max(0, cy - padY);
+      cMaxX = Math.min(aw - 1, cMaxX + padX);
+      my = Math.min(ah - 1, my + padY);
+      cropX = Math.round(cMinX / analyzeScale);
+      cropY = Math.round(cy / analyzeScale);
+      cropW = Math.round((cMaxX - cMinX + 1) / analyzeScale);
+      cropH = Math.round((my - cy + 1) / analyzeScale);
+    }
+  } else {
+    // Alpha-scan for non-halfSide components
+    const imageData = tctx.getImageData(0, 0, aw, ah);
+    const data = imageData.data;
+    let minX = aw, minY = ah, maxX = 0, maxY = 0;
+    const THRESHOLD = 5;
+    for (let y = 0; y < ah; y++) {
+      for (let x = 0; x < aw; x++) {
+        if (data[(y * aw + x) * 4 + 3] > THRESHOLD) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+          found = true;
+        }
+      }
+    }
+    if (found) {
+      const contentW = maxX - minX + 1;
+      const contentH = maxY - minY + 1;
+      const padX = Math.round(contentW * 0.05);
+      const padY = Math.round(contentH * 0.05);
+      minX = Math.max(0, minX - padX);
+      minY = Math.max(0, minY - padY);
+      maxX = Math.min(aw - 1, maxX + padX);
+      maxY = Math.min(ah - 1, maxY + padY);
+      cropX = Math.round(minX / analyzeScale);
+      cropY = Math.round(minY / analyzeScale);
+      cropW = Math.round((maxX - minX + 1) / analyzeScale);
+      cropH = Math.round((maxY - minY + 1) / analyzeScale);
+    }
+  }
+
+  if (!found) {
+    const blank = document.createElement('canvas');
+    blank.width = 4;
+    blank.height = THUMB_H;
+    const bctx = blank.getContext('2d');
+    bctx.fillStyle = thumbBg;
+    bctx.fillRect(0, 0, 4, THUMB_H);
+    return new Promise(resolve => blank.toBlob(b => {
+      resolve(b ? URL.createObjectURL(b) : null);
+    }));
+  }
+
+  // Legacy: eyebrow and blush images contain left+right halves; halve width
+  // (halfSide components already had cropMinX/cropMaxX narrowed above)
+  const HALF_SPLIT = new Set(['eyebrow', 'blush']);
+  if (HALF_SPLIT.has(comp.id)) {
+    cropW = Math.round(cropW / 2);
+  }
+
+  // Fixed height, proportional width (same as original code)
+  const thumbScale = THUMB_H / cropH;
+  const thumbW = Math.max(1, Math.round(cropW * thumbScale));
+
+  // Color the 1:1 crop region (multiply + destination-in)
+  const off = document.createElement('canvas');
+  off.width = cropW;
+  off.height = cropH;
+  const offCtx = off.getContext('2d');
+  offCtx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+  const color = comp.colorGroup ? (COLOR_GROUPS[comp.colorGroup]?.default || null) : null;
+  if (color) {
+    offCtx.globalCompositeOperation = 'multiply';
+    offCtx.fillStyle = color;
+    offCtx.fillRect(0, 0, cropW, cropH);
+    offCtx.globalCompositeOperation = 'destination-in';
+    offCtx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+  }
+
+  // Final thumbnail: background fill + scaled content
+  const thumb = document.createElement('canvas');
+  thumb.width = thumbW;
+  thumb.height = THUMB_H;
+  const thctx = thumb.getContext('2d');
+  thctx.fillStyle = thumbBg;
+  thctx.fillRect(0, 0, thumbW, THUMB_H);
+  thctx.drawImage(off, 0, 0, cropW, cropH, 0, 0, thumbW, THUMB_H);
+
+  return new Promise((resolve) => {
+    thumb.toBlob(b => {
+      resolve(b ? URL.createObjectURL(b) : null);
+    }, 'image/png');
+  });
+}
+function startFakeProgress(fillEl, progressEl, startPct) {
+  // CSS transition runs on compositor thread, not blocked by JS canvas work
+  fillEl.style.transition = 'width 10s cubic-bezier(0.25, 0.1, 0.25, 1)';
+  fillEl.style.width = '99%';
+
+  // Interpolate text number via rAF
+  let rafId;
+  const startTime = performance.now();
+  function tick() {
+    const elapsed = performance.now() - startTime;
+    const t = Math.min(elapsed / 10000, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const pct = Math.round(startPct + eased * (99 - startPct));
+    progressEl.textContent = pct + '%';
+    if (pct < 99) rafId = requestAnimationFrame(tick);
+  }
+  rafId = requestAnimationFrame(tick);
+
+  return {
+    finish() {
+      cancelAnimationFrame(rafId);
+      fillEl.style.transition = 'width 0.2s ease';
+      fillEl.style.width = '100%';
+      progressEl.textContent = '100%';
+    }
+  };
+}
+
+async function preloadAllThumbnails() {
+  const tasks = [];
+  for (const comp of COMPONENTS) {
+    const cs = state.components[comp.id];
+    if (!cs.thumbnailBlobs) cs.thumbnailBlobs = {};
+    for (let i = 0; i < comp.variants.length; i++) {
+      tasks.push(
+        generateThumbnail(comp, i).then(url => {
+          if (url) cs.thumbnailBlobs[i] = url;
+        })
+      );
+    }
+  }
+  await Promise.allSettled(tasks);
+}
+
+/* ============================================================
+   SECTION 6: IMAGE LOADING
+   ============================================================ */
+
+// Bump this when replacing image files to bypass browser cache
+const CACHE_BUST = '?v=15';
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load: ${src}`));
+    img.src = src + CACHE_BUST;
+  });
+}
+
+async function loadComponent(comp, variantIdx) {
+  const cs = state.components[comp.id];
+  const variant = comp.variants[variantIdx];
+  if (!variant) return;
+
+  // Release old resources before loading new variant
+  cs.originalImage = null;
+  cs.editCache = null;
+
+  try {
+    const img = await loadImage(variant.file);
+    cs.originalImage = img;
+    cs.imageUrl = variant.file;
+    cs.currentVariant = variantIdx;
+    // keepOriginal=false → frees originalImage after building cache
+    await buildEditCache(comp, false);
+    cs.dirty = false;
+    // Build preview cache only for preview-override components
+    if (PREVIEW_OVERRIDES[comp.id]) {
+      await buildPreviewCache(comp);
+      cs.previewDirty = false;
+    }
+    cs.loaded = true;
+  } catch (err) {
+    console.error(`加载失败: ${comp.name} (${variant.file})`, err);
+    cs.loaded = false;
+    cs.editCache = null;
+    cs.imageUrl = null;
+  }
+}
+
+async function loadAllDefaults() {
+  const loadingEl = document.getElementById('loading');
+  const progressEl = document.getElementById('load-progress');
+  const fillEl = document.getElementById('progress-fill');
+
+  const compCount = COMPONENTS.length;
+  const REAL_CAP = 20; // real progress covers first 20%
+  let loaded = 0;
+
+  // Phase 1: real progress per component loaded
+  const tasks = COMPONENTS.map((comp) =>
+    loadComponent(comp, 0).then(() => {
+      loaded++;
+      const pct = Math.round(loaded / compCount * REAL_CAP);
+      fillEl.style.width = pct + '%';
+      progressEl.textContent = pct + '%';
+    })
+  );
+  await Promise.allSettled(tasks);
+
+  // Phase 2: fake progress animation 20%→99% over 10s
+  const fake = startFakeProgress(fillEl, progressEl, REAL_CAP);
+  await preloadAllThumbnails();
+
+  fake.finish();
+  loadingEl.classList.add('hidden');
+}
+
+/* ============================================================
+   SECTION 7: RENDERING
+   ============================================================ */
+
+const editorCanvas = document.getElementById('editor-canvas');
+const ctx = editorCanvas.getContext('2d');
+
+function renderAll() {
+  ctx.fillStyle = state.colorGroups['canvas_bg'].color;
+  ctx.fillRect(0, 0, EDIT_SIZE, EDIT_SIZE);
+
+  for (const comp of SORTED) {
+    const cs = state.components[comp.id];
+    if (!cs || !cs.visible || !cs.editCache) continue;
+
+    const cache = cs.editCache;
+    const x = (EDIT_SIZE - cache.width) / 2 + cs.offsetX;
+    const y = (EDIT_SIZE - cache.height) / 2 + cs.offsetY;
+    ctx.drawImage(cache, x, y);
+  }
+
+  // User-uploaded images on top (highest layer)
+  for (const upload of state.userUploads) {
+    const cache = upload.cache;
+    if (!cache) continue;
+    const x = (EDIT_SIZE - cache.width) / 2 + upload.offsetX;
+    const y = (EDIT_SIZE - cache.height) / 2 + upload.offsetY;
+    ctx.drawImage(cache, x, y);
+  }
+}
+
+function scheduleRender() {
+  if (state.renderScheduled) return;
+  state.renderScheduled = true;
+  requestAnimationFrame(async () => {
+    state.renderScheduled = false;
+    // Batch-recolor all dirty components before rendering.
+    // Color picker drag fires dozens of input events per second;
+    // dirty-flag deferral collapses them into ONE recolor pass per frame.
+    const tasks = [];
+    for (const comp of COMPONENTS) {
+      const cs = state.components[comp.id];
+      if (cs.dirty) {
+        tasks.push(
+          buildEditCache(comp, false).then(() => { cs.dirty = false; })
+        );
+      }
+    }
+    if (tasks.length > 0) await Promise.all(tasks);
+
+    // Note: preview is NOT updated here — it is refreshed on-demand
+    // via the "刷新预览" button (calls refreshPreview()).
+    renderAll();
+  });
+}
+
+/* ============================================================
+   SECTION 8: ACTION HANDLERS
+   ============================================================ */
+
+function setColor(groupKey, hexColor) {
+  state.colorGroups[groupKey].color = hexColor;
+
+  // Mark affected components dirty — actual recolor happens once per frame
+  // in scheduleRender(), just before renderAll(). This avoids doing N
+  // synchronous ImageData loops per input event (drag = dozens of events).
+  for (const comp of COMPONENTS) {
+    if (comp.colorGroup === groupKey) {
+      state.components[comp.id].dirty = true;
+      state.components[comp.id].previewDirty = true;
+    }
+    if (comp.linkedColorGroup === groupKey && !state.heterochromia) {
+      state.components[comp.id].dirty = true;
+      state.components[comp.id].previewDirty = true;
+    }
+  }
+  scheduleRender();
+  saveState();
+}
+
+function toggleVisibility(compId, visible) {
+  state.components[compId].visible = visible;
+
+  // 后发片 ⇄ 后发片血线 联动
+  let linked = false;
+  if (compId === 'hair_back') {
+    state.components['bloodline_back'].visible = visible;
+    linked = true;
+  } else if (compId === 'bloodline_back') {
+    state.components['hair_back'].visible = visible;
+    linked = true;
+  }
+
+  scheduleRender();
+  if (linked) rebuildPanel(); // sync both checkboxes
+  saveState();
+}
+
+async function switchVariant(compId, variantIdx) {
+  const comp = COMPONENTS.find(c => c.id === compId);
+  if (!comp) return;
+  const cs = state.components[compId];
+  if (cs.currentVariant === variantIdx) return;
+
+  // currentVariant is set inside loadComponent on success — don't set it here
+  // in case loading fails (prevents UI showing wrong active variant)
+  await loadComponent(comp, variantIdx);
+
+  // Variant linking: when sync is ON (hetero OFF), right eye follows left eye
+  if (!state.heterochromia && (comp.eyeSide === 'left' || comp.halfSide === 'left')) {
+    const rightId = compId.replace('_left', '_right');
+    const rightComp = COMPONENTS.find(c => c.id === rightId);
+    if (rightComp) {
+      await loadComponent(rightComp, variantIdx);
+    }
+  }
+
+  scheduleRender();
+  // 前发打底/前发发片切换变体时同步刷新预览
+  if (compId === 'hair_front_base' || compId === 'hair_front_strands') {
+    refreshPreview();
+  }
+  saveState();
+}
+
+function toggleHeterochromia(enabled) {
+  state.heterochromia = enabled;
+
+  if (enabled) {
+    state.colorGroups['eye_pupil_right'].color = state.colorGroups['eye_pupil_left'].color;
+    state.colorGroups['eye_part_right'].color  = state.colorGroups['eye_part_left'].color;
+  } else {
+    // Syncing ON: copy left-eye variant indices to right-eye components
+    const pairs = [
+      ['eye_pupil_left', 'eye_pupil_right'],
+      ['eye_part_left', 'eye_part_right'],
+      ['eye_highlight_left', 'eye_highlight_right'],
+    ];
+    for (const [leftId, rightId] of pairs) {
+      const leftCs = state.components[leftId];
+      const rightCs = state.components[rightId];
+      if (leftCs && rightCs && leftCs.currentVariant !== rightCs.currentVariant) {
+        const rightComp = COMPONENTS.find(c => c.id === rightId);
+        if (rightComp) {
+          rightCs.currentVariant = leftCs.currentVariant;
+          // Reload the right component with the left's variant
+          loadComponent(rightComp, leftCs.currentVariant);
+        }
+      }
+    }
+  }
+
+  for (const comp of COMPONENTS) {
+    if (comp.linkedColorGroup) {
+      state.components[comp.id].dirty = true;
+      state.components[comp.id].previewDirty = true;
+    }
+  }
+
+  // Replace right-eye row in-place
+  const oldRow = document.getElementById('eye-row-right');
+  if (oldRow) {
+    const newRow = buildEyeRow('right');
+    oldRow.replaceWith(newRow);
+  }
+
+  scheduleRender();
+  saveState();
+}
+
+function resetAll() {
+  clearSavedState();
+  // Reset color groups
+  for (const [key, cfg] of Object.entries(COLOR_GROUPS)) {
+    state.colorGroups[key].color = cfg.default;
+  }
+  // Reset component state
+  for (const comp of COMPONENTS) {
+    const cs = state.components[comp.id];
+    cs.visible = true;
+    cs.offsetX = 0;
+    cs.offsetY = 0;
+    cs.flipped = false;
+    cs.previewOffsetY = 0;
+    if (cs.currentVariant !== 0) {
+      cs.currentVariant = 0;
+    }
+  }
+  // Clear thumbnail blobs
+  for (const comp of COMPONENTS) {
+    const cs2 = state.components[comp.id];
+    if (cs2.thumbnailBlobs) {
+      for (const url of Object.values(cs2.thumbnailBlobs)) {
+        if (url) URL.revokeObjectURL(url);
+      }
+      cs2.thumbnailBlobs = {};
+    }
+  }
+  // Clear preview caches
+  for (const comp of COMPONENTS) {
+    state.components[comp.id].previewCache = null;
+    state.components[comp.id].previewDirty = false;
+  }
+  state.heterochromia = false;
+  state.previewHairLayerSwapped = false;
+  eyeOpen.clear();
+  state.userUploads = []; // clear user uploads
+
+  // Reload all with defaults
+  document.getElementById('loading').classList.remove('hidden');
+  Promise.all(COMPONENTS.map(c => loadComponent(c, 0))).then(() => {
+    document.getElementById('loading').classList.add('hidden');
+    rebuildPanel();
+    renderAll();
+  });
+}
+
+/* ============================================================
+   SECTION 8b: PREVIEW EXPORT
+   ============================================================ */
+
+async function exportPreview() {
+  const btn = document.getElementById('btn-preview-export');
+  const origText = btn.textContent;
+  btn.textContent = '⏳ 导出中...';
+  btn.disabled = true;
+
+  try {
+    const size = PREVIEW_EXPORT_SIZE;
+    const cvs = document.createElement('canvas');
+    cvs.width = size;
+    cvs.height = size;
+    const pCtx = cvs.getContext('2d');
+    pCtx.fillStyle = state.colorGroups['canvas_bg'].color;
+    pCtx.fillRect(0, 0, size, size);
+
+    const off = document.createElement('canvas');
+    const offCtx = off.getContext('2d');
+
+    const previewSorted = SORTED.filter(c => PREVIEW_OVERRIDES[c.id])
+      .sort((a, b) => (PREVIEW_OVERRIDES[a.id].previewZ || 0) - (PREVIEW_OVERRIDES[b.id].previewZ || 0));
+    for (const comp of previewSorted) {
+      const cs = state.components[comp.id];
+      if (!cs || !cs.visible) continue;
+      // ── Dedicated preview-image export path ──────────────
+      const file = getPreviewFile(comp);
+      if (!file) continue;
+      let img;
+      try {
+        img = await loadImage(file);
+      } catch (err) {
+        console.error(`预览导出加载失败: ${comp.name}`, err);
+        continue;
+      }
+
+      const nw = img.naturalWidth;
+      const nh = img.naturalHeight;
+      const fitScale = size / Math.max(nw, nh);
+      const w = Math.round(nw * fitScale);
+      const h = Math.round(nh * fitScale);
+      const pvOff = getPreviewOffset(comp);
+      const x = Math.round((size - w) / 2 + pvOff.x);
+      const y = Math.round((size - h) / 2 + pvOff.y);
+
+      const override = PREVIEW_OVERRIDES[comp.id];
+      if (override.shadow) {
+        pCtx.shadowColor = override.shadow.color;
+        pCtx.shadowBlur = override.shadow.blur * (size / PREVIEW_DISPLAY_SIZE);
+        pCtx.shadowOffsetX = override.shadow.offsetX * (size / PREVIEW_DISPLAY_SIZE);
+        pCtx.shadowOffsetY = override.shadow.offsetY * (size / PREVIEW_DISPLAY_SIZE);
+      }
+
+      const color = getEffectiveColor(comp);
+      if (color) {
+        off.width = w;
+        off.height = h;
+        offCtx.drawImage(img, 0, 0, w, h);
+        offCtx.globalCompositeOperation = 'multiply';
+        offCtx.fillStyle = color;
+        offCtx.fillRect(0, 0, w, h);
+        offCtx.globalCompositeOperation = 'destination-in';
+        offCtx.drawImage(img, 0, 0, w, h);
+        pCtx.drawImage(off, x, y);
+      } else {
+        pCtx.drawImage(img, x, y, w, h);
+      }
+
+      if (override.shadow) {
+        pCtx.shadowColor = 'transparent';
+        pCtx.shadowBlur = 0;
+        pCtx.shadowOffsetX = 0;
+        pCtx.shadowOffsetY = 0;
+      }
+    }
+
+    // Phase 2: overlay each PREVIEW_CROPS entry at full resolution (4134²).
+    // Composite layer range → crop native rect → draw 1:1 on export canvas.
+    const FULL = 4134;
+    const fullCanvas = document.createElement('canvas');
+    const fCtx = fullCanvas.getContext('2d');
+
+    for (const crop of getEffectivePreviewCrops()) {
+      const [layerMin, layerMax] = crop.layers;
+
+      fullCanvas.width = FULL;
+      fullCanvas.height = FULL;
+
+      for (const comp of SORTED) {
+        if (comp.layer < layerMin || comp.layer > layerMax) continue;
+        const cs = state.components[comp.id];
+        if (!cs || !cs.visible) continue;
+
+        let img = cs.originalImage;
+        if (!img && cs.imageUrl) {
+          try { img = await loadImage(cs.imageUrl); }
+          catch (err) { continue; }
+        }
+        if (!img) continue;
+
+        const fs = FULL / Math.max(img.naturalWidth, img.naturalHeight);
+        const fw = Math.round(img.naturalWidth * fs);
+        const fh = Math.round(img.naturalHeight * fs);
+        const fx = Math.round((FULL - fw) / 2 + cs.offsetX * (FULL / EDIT_SIZE));
+        const fy = Math.round((FULL - fh) / 2 + cs.offsetY * (FULL / EDIT_SIZE));
+
+        const color = getEffectiveColor(comp);
+        const doFlipFull = comp.flippable && cs.flipped;
+
+        if (color) {
+          off.width = fw;
+          off.height = fh;
+
+          if (doFlipFull) { const ax = 2 * fw * (comp.flipAxis || 0.5); offCtx.save(); offCtx.translate(ax, 0); offCtx.scale(-1, 1); }
+
+          if (comp.halfSide) {
+            const C = EYE_HL_CROP;
+            const nw2 = img.naturalWidth;
+            const nh2 = img.naturalHeight;
+            if (comp.halfSide === 'left') {
+              const sw = C.midX - C.x;
+              offCtx.drawImage(img,
+                C.x, C.y, sw, C.h,
+                Math.round(C.x / nw2 * fw), Math.round(C.y / nh2 * fh),
+                Math.round(sw / nw2 * fw), Math.round(C.h / nh2 * fh));
+            } else {
+              const sw = (C.x + C.w) - C.midX;
+              offCtx.drawImage(img,
+                C.midX, C.y, sw, C.h,
+                Math.round(C.midX / nw2 * fw), Math.round(C.y / nh2 * fh),
+                Math.round(sw / nw2 * fw), Math.round(C.h / nh2 * fh));
+            }
+          } else {
+            offCtx.drawImage(img, 0, 0, fw, fh);
+          }
+          offCtx.globalCompositeOperation = 'multiply';
+          offCtx.fillStyle = color;
+          offCtx.fillRect(0, 0, fw, fh);
+          offCtx.globalCompositeOperation = 'destination-in';
+          if (comp.halfSide) {
+            const C = EYE_HL_CROP;
+            const nw2 = img.naturalWidth;
+            const nh2 = img.naturalHeight;
+            if (comp.halfSide === 'left') {
+              const sw = C.midX - C.x;
+              offCtx.drawImage(img,
+                C.x, C.y, sw, C.h,
+                Math.round(C.x / nw2 * fw), Math.round(C.y / nh2 * fh),
+                Math.round(sw / nw2 * fw), Math.round(C.h / nh2 * fh));
+            } else {
+              const sw = (C.x + C.w) - C.midX;
+              offCtx.drawImage(img,
+                C.midX, C.y, sw, C.h,
+                Math.round(C.midX / nw2 * fw), Math.round(C.y / nh2 * fh),
+                Math.round(sw / nw2 * fw), Math.round(C.h / nh2 * fh));
+            }
+          } else {
+            offCtx.drawImage(img, 0, 0, fw, fh);
+          }
+
+          if (doFlipFull) { offCtx.restore(); }
+          fCtx.drawImage(off, fx, fy);
+        } else {
+          if (doFlipFull) {
+            fCtx.save();
+            fCtx.translate(fx, fy);
+            const ax = 2 * fw * (comp.flipAxis || 0.5);
+            fCtx.translate(ax, 0);
+            fCtx.scale(-1, 1);
+          }
+          if (comp.halfSide) {
+            const C = EYE_HL_CROP;
+            const nw2 = img.naturalWidth;
+            const nh2 = img.naturalHeight;
+            if (comp.halfSide === 'left') {
+              const sw = C.midX - C.x;
+              fCtx.drawImage(img,
+                C.x, C.y, sw, C.h,
+                fx + Math.round(C.x / nw2 * fw), fy + Math.round(C.y / nh2 * fh),
+                Math.round(sw / nw2 * fw), Math.round(C.h / nh2 * fh));
+            } else {
+              const sw = (C.x + C.w) - C.midX;
+              fCtx.drawImage(img,
+                C.midX, C.y, sw, C.h,
+                fx + Math.round(C.midX / nw2 * fw), fy + Math.round(C.y / nh2 * fh),
+                Math.round(sw / nw2 * fw), Math.round(C.h / nh2 * fh));
+            }
+          } else {
+            fCtx.drawImage(img, fx, fy, fw, fh);
+          }
+          if (doFlipFull) { fCtx.restore(); }
+        }
+      }
+
+      // Apply shadow if configured
+      if (crop.shadow) {
+        pCtx.shadowColor = crop.shadow.color;
+        pCtx.shadowBlur = crop.shadow.blur * (size / PREVIEW_DISPLAY_SIZE);
+        pCtx.shadowOffsetX = crop.shadow.offsetX * (size / PREVIEW_DISPLAY_SIZE);
+        pCtx.shadowOffsetY = crop.shadow.offsetY * (size / PREVIEW_DISPLAY_SIZE);
+      }
+
+      // Add preview position offset from components with previewPositionable
+      let prevExtraOffY = 0;
+      for (const comp of SORTED) {
+        if (comp.layer >= layerMin && comp.layer <= layerMax && comp.previewPositionable) {
+          prevExtraOffY = (state.components[comp.id]?.previewOffsetY || 0) * size;
+          break;
+        }
+      }
+
+      // Draw crop at native 1:1 resolution on export canvas
+      const dw = crop.w;
+      const dh = crop.h;
+      const dx = Math.round((size - dw) / 2 + crop.offsetX * size);
+      const dy = Math.round((size - dh) / 2 + crop.offsetY * size + prevExtraOffY);
+      pCtx.drawImage(fullCanvas, crop.x, crop.y, crop.w, crop.h, dx, dy, dw, dh);
+
+      // Reset shadow
+      if (crop.shadow) {
+        pCtx.shadowColor = 'transparent';
+        pCtx.shadowBlur = 0;
+        pCtx.shadowOffsetX = 0;
+        pCtx.shadowOffsetY = 0;
+      }
+    }
+
+    const blob = await new Promise((resolve, reject) => {
+      cvs.toBlob(b => b ? resolve(b) : reject(new Error('toBlob null')), 'image/png');
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'nunu_preview_export.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    btn.textContent = '✅ 导出完成!';
+    setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 1500);
+  } catch (err) {
+    console.error('预览导出失败:', err);
+    btn.textContent = '❌ 失败，重试';
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = origText; }, 3000);
+  }
+}
+
+/* ============================================================
+   SECTION 8c: USER IMAGE UPLOAD
+   ============================================================ */
+
+function handleFileSelect(file) {
+  if (!file || file.type !== 'image/png') {
+    alert('请选择 PNG 格式的图片文件。');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const id = ++uploadIdCounter;
+      const fitScale = EDIT_SIZE / Math.max(img.naturalWidth, img.naturalHeight);
+      const w = Math.round(img.naturalWidth * fitScale);
+      const h = Math.round(img.naturalHeight * fitScale);
+
+      // Build cache canvas (no coloring — user image is already final)
+      const cache = document.createElement('canvas');
+      cache.width = w;
+      cache.height = h;
+      cache.getContext('2d').drawImage(img, 0, 0, w, h);
+
+      const upload = {
+        id: 'upload_' + id,
+        name: file.name,
+        image: img,
+        cache: cache,
+        offsetX: 0,
+        offsetY: 0,
+      };
+
+      state.userUploads.push(upload);
+      rebuildPanel();
+      scheduleRender();
+      saveState();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeUserUpload(id) {
+  const idx = state.userUploads.findIndex(u => u.id === id);
+  if (idx !== -1) {
+    state.userUploads.splice(idx, 1);
+    rebuildPanel();
+    scheduleRender();
+    saveState();
+  }
+}
+
+function triggerUpload() {
+  const input = document.getElementById('user-upload-input');
+  input.value = ''; // allow re-upload of same file
+  input.click();
+}
+
+/* ============================================================
+   SECTION 9: EXPORT
+   ============================================================ */
+
+/**
+ * Export all visible components stacked in layer order to a 4134×4134 PNG.
+ *
+ * Strategy: GPU-accelerated Canvas compositing (no ImageData).
+ * For each colored component:
+ *   1. Draw original image scaled to export size (gives correct alpha)
+ *   2. multiply fillRect → colors the image
+ *   3. destination-in with original image → restores alpha
+ *
+ * This avoids getImageData on 4134×4134 canvases (68MB per call)
+ * which can hit browser memory limits and produce blank output.
+ *
+ * Note: 'destination-in' slightly darkens semi-transparent anti-alias
+ * edges (1-2px wide), imperceptible in print at 300dpi.
+ *
+ * Export size: 4134×4134px = 35×35cm @ 300dpi (A4 printable).
+ */
+async function exportPNG() {
+  const btn = document.getElementById('btn-export');
+  const origText = btn.textContent;
+  btn.textContent = '⏳ 正在导出 0%...';
+  btn.disabled = true;
+
+  try {
+    const size = EXPORT_SIZE;
+    const exportScale = size / EDIT_SIZE;
+
+    const cvs = document.createElement('canvas');
+    cvs.width = size;
+    cvs.height = size;
+    const exCtx = cvs.getContext('2d');
+
+    // Canvas background colour
+    exCtx.fillStyle = state.colorGroups['canvas_bg'].color;
+    exCtx.fillRect(0, 0, size, size);
+
+    // Reusable offscreen canvas for per-component processing
+    const off = document.createElement('canvas');
+    const offCtx = off.getContext('2d');
+
+    const visible = SORTED.filter(c => {
+      const cs = state.components[c.id];
+      return cs && cs.visible && (cs.originalImage || cs.imageUrl);
+    });
+    let done = 0;
+
+    for (const comp of SORTED) {
+      const cs = state.components[comp.id];
+      if (!cs || !cs.visible) continue;
+
+      // Reload original image if it was freed (lazy-load optimization)
+      let img = cs.originalImage;
+      if (!img && cs.imageUrl) {
+        try {
+          img = await loadImage(cs.imageUrl);
+        } catch (err) {
+          console.error(`导出时加载图片失败: ${comp.name}`, err);
+          continue;
+        }
+      }
+      if (!img) continue;
+      const nw = img.naturalWidth;
+      const nh = img.naturalHeight;
+
+      const fitScale = size / Math.max(nw, nh);
+      const w = Math.round(nw * fitScale);
+      const h = Math.round(nh * fitScale);
+      const x = Math.round((size - w) / 2 + cs.offsetX * exportScale);
+      const y = Math.round((size - h) / 2 + cs.offsetY * exportScale);
+
+      const color = getEffectiveColor(comp);
+
+      const doFlip = comp.flippable && cs.flipped;
+
+      if (color) {
+        // Resize offscreen canvas (resetting all state including compositeOperation)
+        off.width = w;
+        off.height = h;
+
+        if (doFlip) { const ax = 2 * w * (comp.flipAxis || 0.5); offCtx.save(); offCtx.translate(ax, 0); offCtx.scale(-1, 1); }
+
+        // Step 1: Draw original image → correct alpha channel
+        offCtx.drawImage(img, 0, 0, w, h);
+
+        // Step 2: Multiply the target color.
+        // This corrupts alpha: transparent pixels → opaque black.
+        offCtx.globalCompositeOperation = 'multiply';
+        offCtx.fillStyle = color;
+        offCtx.fillRect(0, 0, w, h);
+
+        // Step 3: Restore alpha from the original image.
+        // 'destination-in' keeps the colored pixels only where the
+        // original image was non-transparent.
+        offCtx.globalCompositeOperation = 'destination-in';
+        offCtx.drawImage(img, 0, 0, w, h);
+
+        if (doFlip) { offCtx.restore(); }
+
+        // Draw to export canvas 1:1 (no scaling)
+        exCtx.drawImage(off, x, y);
+      } else {
+        // No coloring — draw original directly
+        if (doFlip) {
+          exCtx.save();
+          exCtx.translate(x, y);
+          const ax = 2 * w * (comp.flipAxis || 0.5);
+          exCtx.translate(ax, 0);
+          exCtx.scale(-1, 1);
+          exCtx.drawImage(img, 0, 0, w, h);
+          exCtx.restore();
+        } else {
+          exCtx.drawImage(img, x, y, w, h);
+        }
+      }
+
+      done++;
+      btn.textContent = `⏳ 正在导出 ${Math.round(done / visible.length * 100)}%...`;
+    }
+
+    // User-uploaded images on top (highest layer)
+    for (const upload of state.userUploads) {
+      const img = upload.image;
+      if (!img) continue;
+
+      const nw = img.naturalWidth;
+      const nh = img.naturalHeight;
+      const fitScale = size / Math.max(nw, nh);
+      const w = Math.round(nw * fitScale);
+      const h = Math.round(nh * fitScale);
+      const x = Math.round((size - w) / 2 + upload.offsetX * exportScale);
+      const y = Math.round((size - h) / 2 + upload.offsetY * exportScale);
+
+      exCtx.drawImage(img, x, y, w, h);
+    }
+
+    // Trigger download
+    btn.textContent = '⏳ 正在生成文件...';
+    const blob = await new Promise((resolve, reject) => {
+      cvs.toBlob(b => {
+        if (b) resolve(b);
+        else reject(new Error('toBlob 返回 null'));
+      }, 'image/png');
+    });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'nunu_export.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    btn.textContent = '✅ 导出完成!';
+    scheduleRender(); // restore edit canvas after GPU memory pressure
+    setTimeout(() => {
+      btn.textContent = origText;
+      btn.disabled = false;
+    }, 1500);
+
+  } catch (err) {
+    console.error('导出失败:', err);
+    btn.textContent = '❌ 导出失败，点此重试';
+    btn.disabled = false;
+    scheduleRender(); // restore edit canvas
+    setTimeout(() => {
+      btn.textContent = origText;
+    }, 3000);
+  }
+}
+
+/* ============================================================
+   SECTION 10: UI BUILDING
+   ============================================================ */
+
+const panel = document.getElementById('panel');
+let openCategory = null; // only one category open at a time
+
+function rebuildPanel() {
+  const prevOpen = openCategory; // preserve across rebuild (e.g. heterochromia toggle)
+  panel.innerHTML = '';
+
+  // Background colour picker at the very top
+  const bgSection = document.createElement('div');
+  bgSection.style.cssText = 'padding:10px 20px;border-bottom:1px solid rgba(220,200,215,0.2);display:flex;align-items:center;gap:8px;';
+  const bgLabel = document.createElement('span');
+  bgLabel.textContent = '画布底色';
+  bgLabel.style.cssText = 'font-size:13px;font-weight:500;color:var(--text);letter-spacing:0.1px;';
+  bgSection.appendChild(bgLabel);
+  bgSection.appendChild(buildColorSwatchForGroup('canvas_bg'));
+  panel.appendChild(bgSection);
+
+  for (const cat of CATEGORIES) {
+    const catComps = COMPONENTS.filter(c => c.category === cat.key && !c.hidden);
+    if (catComps.length === 0) continue;
+
+    const section = document.createElement('div');
+    section.className = 'category';
+    section.dataset.cat = cat.key;
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'category-header';
+    header.innerHTML = `<span>${cat.label}</span><span class="arrow">▶</span>`;
+    header.addEventListener('click', () => {
+      const wasOpen = section.classList.contains('open');
+      panel.querySelectorAll('.category.open').forEach(s => s.classList.remove('open'));
+      if (!wasOpen) {
+        section.classList.add('open');
+        openCategory = cat.key;
+      } else {
+        openCategory = null;
+      }
+    });
+    section.appendChild(header);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'category-body';
+
+    if (cat.key === 'face') {
+      // Explicit order: other face parts → left eye group → right eye group
+      const findComp = (id) => catComps.find(c => c.id === id);
+      const order = [
+        'eyebrow', 'mouth', 'blush',
+        '::eye_left', '::eye_right',
+
+      ];
+      for (const id of order) {
+        if (id === '::eye_left')  { body.appendChild(buildEyeRow('left')); continue; }
+        if (id === '::eye_right') { body.appendChild(buildEyeRow('right')); continue; }
+        const comp = findComp(id);
+        if (comp) body.appendChild(buildCompRow(comp));
+      }
+    } else {
+      for (const comp of catComps) {
+        body.appendChild(buildCompRow(comp));
+      }
+    }
+
+    // Add upload buttons at the bottom of body category
+    if (cat.key === 'body') {
+      const uploadSection = document.createElement('div');
+      uploadSection.className = 'upload-section';
+      const dlBtn = document.createElement('a');
+      dlBtn.className = 'upload-btn';
+      dlBtn.textContent = '下载模板';
+      dlBtn.href = 'images/cloth.psd';
+      dlBtn.download = 'cloth.psd';
+      const importBtn = document.createElement('button');
+      importBtn.className = 'upload-btn';
+      importBtn.textContent = '导入图片';
+      importBtn.addEventListener('click', triggerUpload);
+      uploadSection.appendChild(dlBtn);
+      uploadSection.appendChild(importBtn);
+      body.appendChild(uploadSection);
+
+      // Show uploaded images
+      for (const upload of state.userUploads) {
+        body.appendChild(buildUploadRow(upload));
+      }
+    }
+
+    // ── Category FAQ blocks ──
+    if (cat.key === 'face') {
+      body.appendChild(buildFaq(
+        'Q：为什么脸部组件不支持自定义位置！',
+        'A：缝制后效果与平面效果不同，固定位置经过测试后更呆萌哟~'
+      ));
+    } else if (cat.key === 'body') {
+      body.appendChild(buildFaq(
+        'Q：想自己导入服装，怎么办？',
+        'A：点击"下载模板"，根据下载的psd文档内容进行绘制，完成后再导入图片即可~'
+      ));
+    } else if (cat.key === 'hair') {
+      // Layer swap checkbox for hair_front_base ↔ hair_front_strands in preview
+      const swapRow = document.createElement('label');
+      swapRow.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 20px;cursor:pointer;user-select:none;';
+      const swapCb = document.createElement('input');
+      swapCb.type = 'checkbox';
+      swapCb.checked = state.previewHairLayerSwapped;
+      swapCb.addEventListener('change', () => {
+        state.previewHairLayerSwapped = swapCb.checked;
+        refreshPreview();
+        saveState();
+      });
+      swapRow.appendChild(swapCb);
+      const swapLabel = document.createElement('span');
+      swapLabel.style.cssText = 'font-size:12px;color:var(--text-soft);';
+      swapLabel.textContent = '打底在上';
+      swapRow.appendChild(swapLabel);
+      body.appendChild(swapRow);
+    } else if (cat.key === 'bloodline') {
+      body.appendChild(buildFaq(
+        'Q：血线的颜色要怎么选择？',
+        'A：肤色与发色的血线最好选择与肤色/发色颜色相近的颜色，但也不要特别近！图纸印刷后颜色过于接近会导致看不清楚血线哦。黑色/深灰色部件的血线最好选用浅灰色！'
+      ));
+    }
+
+    section.appendChild(body);
+    panel.appendChild(section);
+  }
+
+  // Restore previously-open category, or default to face
+  if (prevOpen) {
+    const sec = panel.querySelector(`.category[data-cat="${prevOpen}"]`);
+    if (sec) { sec.classList.add('open'); openCategory = prevOpen; return; }
+  }
+  const first = panel.querySelector('.category');
+  if (first) { first.classList.add('open'); openCategory = first.dataset.cat; }
+}
+
+function buildCompRow(comp) {
+  const cs = state.components[comp.id];
+  const row = document.createElement('div');
+  row.className = 'comp-row';
+
+  // --- Main row ---
+  const main = document.createElement('div');
+  main.className = 'comp-row-main';
+
+  // Checkbox (optional components)
+  if (comp.optional) {
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = cs.visible;
+    cb.addEventListener('change', () => toggleVisibility(comp.id, cb.checked));
+    main.appendChild(cb);
+  } else {
+    // Spacer for alignment
+    const sp = document.createElement('span');
+    sp.style.cssText = 'width:18px;flex-shrink:0;';
+    main.appendChild(sp);
+  }
+
+  // Name
+  const nameEl = document.createElement('span');
+  nameEl.className = 'comp-name';
+  nameEl.textContent = comp.name;
+  main.appendChild(nameEl);
+
+  // Color swatch or linked label
+  // panelHideColor: suppress duplicate color pickers for components that
+  // share a color group with a "primary" component (e.g. all hair pieces
+  // follow 发色 — only 发色 shows the swatch).
+  if (comp.colorGroup && !comp.panelHideColor) {
+    if (isLinked(comp)) {
+      const linkedLabel = document.createElement('span');
+      linkedLabel.className = 'linked-label';
+      const src = getLinkSource(comp);
+      linkedLabel.textContent = src ? `继承${src.name}色` : '继承';
+      main.appendChild(linkedLabel);
+    } else {
+      main.appendChild(buildColorSwatch(comp));
+    }
+  }
+
+  // Variant buttons / fold (>=3 variants → collapsible)
+  if (comp.variants.length >= 3) {
+    const toggle = document.createElement('button');
+    toggle.className = 'variant-toggle';
+    toggle.textContent = '▶';
+    toggle.title = '展开变体';
+    main.appendChild(toggle);
+
+    row.appendChild(main);
+
+    const fold = document.createElement('div');
+    fold.className = 'variant-fold';
+    fold.appendChild(buildVariantBtns(comp));
+
+    toggle.addEventListener('click', () => {
+      fold.classList.toggle('open');
+      toggle.classList.toggle('open');
+      toggle.textContent = fold.classList.contains('open') ? '▼' : '▶';
+    });
+
+    row.appendChild(fold);
+  } else {
+    if (comp.variants.length > 1) {
+      main.appendChild(buildVariantBtns(comp));
+    }
+    row.appendChild(main);
+  }
+
+  // Flip button for flippable components
+  if (comp.flippable) {
+    const flipBtn = document.createElement('button');
+    flipBtn.className = 'pos-btn';
+    flipBtn.textContent = '↔';
+    flipBtn.title = '镜像翻转';
+    flipBtn.addEventListener('click', () => {
+      cs.flipped = !cs.flipped;
+      cs.dirty = true;
+      scheduleRender();
+      saveState();
+    });
+    main.appendChild(flipBtn);
+  }
+
+  // Position controls (up/down) for positionable components
+  if (comp.positionable) {
+    const posRow = document.createElement('div');
+    posRow.className = 'pos-row';
+
+    const label = document.createElement('span');
+    label.className = 'pos-label';
+    label.textContent = '↕';
+
+    const upBtn = document.createElement('button');
+    upBtn.className = 'pos-btn';
+    upBtn.textContent = '▲';
+    upBtn.title = '上移';
+    upBtn.addEventListener('click', () => {
+      cs.offsetY = Math.max(-15, cs.offsetY - 3);
+      scheduleRender();
+    });
+
+    const downBtn = document.createElement('button');
+    downBtn.className = 'pos-btn';
+    downBtn.textContent = '▼';
+    downBtn.title = '下移';
+    downBtn.addEventListener('click', () => {
+      cs.offsetY = Math.min(15, cs.offsetY + 3);
+      scheduleRender();
+    });
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'pos-btn';
+    resetBtn.textContent = '↺';
+    resetBtn.title = '重置位置';
+    resetBtn.addEventListener('click', () => {
+      cs.offsetY = 0;
+      scheduleRender();
+    });
+
+    posRow.appendChild(label);
+    posRow.appendChild(upBtn);
+    posRow.appendChild(downBtn);
+    posRow.appendChild(resetBtn);
+    row.appendChild(posRow);
+  }
+
+  // Preview position controls for previewPositionable components
+  if (comp.previewPositionable) {
+    const pvRow = document.createElement('div');
+    pvRow.className = 'pos-row';
+
+    const label = document.createElement('span');
+    label.className = 'pos-label';
+    label.textContent = '🔍↕';
+    label.title = '预览位置';
+
+    const upBtn = document.createElement('button');
+    upBtn.className = 'pos-btn';
+    upBtn.textContent = '▲';
+    upBtn.title = '预览上移';
+    upBtn.addEventListener('click', () => {
+      cs.previewOffsetY = Math.max(-0.20, +(cs.previewOffsetY - 0.02).toFixed(4));
+      renderPreviewBase();
+      renderPreviewOverlay();
+      saveState();
+    });
+
+    const downBtn = document.createElement('button');
+    downBtn.className = 'pos-btn';
+    downBtn.textContent = '▼';
+    downBtn.title = '预览下移';
+    downBtn.addEventListener('click', () => {
+      cs.previewOffsetY = Math.min(0.20, +(cs.previewOffsetY + 0.02).toFixed(4));
+      renderPreviewBase();
+      renderPreviewOverlay();
+      saveState();
+    });
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'pos-btn';
+    resetBtn.textContent = '↺';
+    resetBtn.title = '重置预览位置';
+    resetBtn.addEventListener('click', () => {
+      cs.previewOffsetY = 0;
+      renderPreviewBase();
+      renderPreviewOverlay();
+      saveState();
+    });
+
+    pvRow.appendChild(label);
+    pvRow.appendChild(upBtn);
+    pvRow.appendChild(downBtn);
+    pvRow.appendChild(resetBtn);
+    row.appendChild(pvRow);
+  }
+
+  return row;
+}
+
+function buildColorSwatch(comp) {
+  return buildColorSwatchForGroup(comp.colorGroup);
+}
+
+function buildColorSwatchForGroup(groupKey) {
+  const wrapper = document.createElement('span');
+  wrapper.className = 'color-swatch';
+
+  const color = state.colorGroups[groupKey].color;
+  wrapper.style.backgroundColor = color;
+
+  const input = document.createElement('input');
+  input.type = 'color';
+  input.value = color;
+  input.addEventListener('input', (e) => {
+    const newColor = e.target.value;
+    wrapper.style.backgroundColor = newColor;
+    setColor(groupKey, newColor);
+  });
+
+  wrapper.appendChild(input);
+  return wrapper;
+}
+
+/**
+ * Build a combined eye row (左眼 or 右眼).
+ * Left eye: always expandable, contains 高光, 瞳孔, 底色.
+ * Right eye:
+ *   - Synced (hetero OFF): flat row, no expansion, just checkbox indicator.
+ *   - Independent (hetero ON): expandable, same structure as left eye.
+ */
+function buildEyeRow(side) {
+  const isLeft = side === 'left';
+  const heteroOn = state.heterochromia;
+  const rightSynced = !isLeft && !heteroOn;
+
+  const highlightComp = COMPONENTS.find(c => c.id === `eye_highlight_${side}`);
+  const pupilComp     = COMPONENTS.find(c => c.id === `eye_pupil_${side}`);
+  const partComp      = COMPONENTS.find(c => c.id === `eye_part_${side}`);
+
+  const row = document.createElement('div');
+  row.className = 'comp-row';
+  if (!isLeft) row.id = 'eye-row-right';
+
+  // ── Header ──
+  const main = document.createElement('div');
+  main.className = 'comp-row-main';
+
+  const sp = document.createElement('span');
+  sp.style.cssText = 'width:18px;flex-shrink:0;';
+  main.appendChild(sp);
+
+  const arrow = document.createElement('span');
+  arrow.style.cssText = 'font-size:11px;transition:transform 0.3s var(--ease);width:14px;flex-shrink:0;text-align:center;';
+  arrow.textContent = '▶';
+  main.appendChild(arrow);
+
+  const nameEl = document.createElement('span');
+  nameEl.className = 'comp-name';
+  nameEl.textContent = isLeft ? '左眼' : '右眼';
+  main.appendChild(nameEl);
+
+  if (!isLeft) {
+    const syncWrap = document.createElement('span');
+    syncWrap.style.cssText = 'display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#B8A8C0;cursor:pointer;white-space:nowrap;user-select:none;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !heteroOn;
+    cb.style.cssText = 'width:16px;height:16px;margin:0;cursor:pointer;pointer-events:none;';
+    syncWrap.appendChild(cb);
+    syncWrap.appendChild(document.createTextNode('与左眼同步'));
+    syncWrap.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const newChecked = !cb.checked;
+      cb.checked = newChecked;
+      toggleHeterochromia(!newChecked);
+    });
+    main.appendChild(syncWrap);
+  }
+
+  row.appendChild(main);
+
+  // ── Right eye synced: no body, arrow hidden ──
+  if (rightSynced) {
+    arrow.style.visibility = 'hidden';
+    arrow.style.color = '#C8B0C0';
+    return row;
+  }
+
+  // ── Folding sub-body ──
+  const body = document.createElement('div');
+  const wasOpen = eyeOpen.has(side);
+  body.style.cssText = wasOpen ? 'padding-top:2px;' : 'display:none;padding-top:2px;';
+  if (wasOpen) {
+    arrow.style.transform = 'rotate(90deg)';
+    arrow.style.color = '#D08090';
+  }
+
+  const subComps = [
+    { comp: highlightComp, label: '高光' },
+    { comp: pupilComp,     label: '瞳孔' },
+    { comp: partComp,      label: '底色' },
+  ];
+
+  for (const { comp, label } of subComps) {
+    if (!comp) continue;
+    const cs = state.components[comp.id];
+
+    const subWrap = document.createElement('div');
+    subWrap.style.cssText = 'margin-top:3px;padding-left:26px;';
+
+    const sub = document.createElement('div');
+    sub.style.cssText = 'display:flex;align-items:center;gap:5px;';
+
+    if (comp.optional) {
+      const visCb = document.createElement('input');
+      visCb.type = 'checkbox';
+      visCb.checked = cs.visible;
+      visCb.style.cssText = 'width:15px;height:15px;margin:0;cursor:pointer;';
+      visCb.addEventListener('change', () => toggleVisibility(comp.id, visCb.checked));
+      sub.appendChild(visCb);
+    } else {
+      const visSp = document.createElement('span');
+      visSp.style.cssText = 'width:15px;flex-shrink:0;';
+      sub.appendChild(visSp);
+    }
+
+    const sLabel = document.createElement('span');
+    sLabel.style.cssText = 'font-size:10px;color:#B8A8C0;width:20px;flex-shrink:0;';
+    sLabel.textContent = label;
+    sub.appendChild(sLabel);
+
+    // Right eye when independent: show color swatches
+    if (comp.colorGroup && !comp.panelHideColor) {
+      sub.appendChild(buildColorSwatchForGroup(comp.colorGroup));
+    }
+
+    if (comp.variants.length >= 3) {
+      const toggle = document.createElement('button');
+      toggle.className = 'variant-toggle';
+      toggle.textContent = '▶';
+      toggle.title = '展开变体';
+      sub.appendChild(toggle);
+      subWrap.appendChild(sub);
+      const fold = document.createElement('div');
+      fold.className = 'variant-fold';
+      fold.style.paddingLeft = '0';
+      fold.appendChild(buildVariantBtns(comp));
+      toggle.addEventListener('click', () => {
+        fold.classList.toggle('open');
+        toggle.classList.toggle('open');
+        toggle.textContent = fold.classList.contains('open') ? '▼' : '▶';
+      });
+      subWrap.appendChild(fold);
+    } else {
+      subWrap.appendChild(sub);
+      if (comp.variants.length > 1) {
+        sub.appendChild(buildVariantBtns(comp));
+      }
+    }
+
+    body.appendChild(subWrap);
+  }
+
+  row.appendChild(body);
+
+  // Click handler: toggle fold
+  main.addEventListener('click', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.closest('.color-swatch')) return;
+    // Don't toggle if clicking the sync checkbox area on right eye
+    if (!isLeft && e.target.closest('span') && e.target.closest('span').querySelector('input[type="checkbox"]')) return;
+    const open = body.style.display !== 'none';
+    if (open) { eyeOpen.delete(side); } else { eyeOpen.add(side); }
+    body.style.display = open ? 'none' : 'block';
+    arrow.style.transform = open ? '' : 'rotate(90deg)';
+    arrow.style.color = open ? '#C8B0C0' : '#D08090';
+  });
+
+  return row;
+}
+
+function buildVariantBtns(comp, onChange) {
+  const cs = state.components[comp.id];
+  if (!cs.thumbnailBlobs) cs.thumbnailBlobs = {};
+
+  const container = document.createElement('span');
+  container.className = 'variant-btns';
+
+  for (let i = 0; i < comp.variants.length; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'variant-img-btn' + (i === cs.currentVariant ? ' active' : '');
+    btn.title = comp.variants[i].label;
+
+    const cached = cs.thumbnailBlobs[i];
+    if (cached) {
+      // Use cached thumbnail
+      const imgEl = document.createElement('img');
+      imgEl.src = cached;
+      imgEl.alt = comp.variants[i].label;
+      btn.appendChild(imgEl);
+    } else {
+      // Placeholder while async generation runs
+      btn.textContent = '…';
+      btn.style.color = '#B8A8C0';
+      btn.style.fontSize = '12px';
+      generateThumbnail(comp, i).then(url => {
+        if (url) {
+          cs.thumbnailBlobs[i] = url;
+          // Only update if button is still in DOM
+          if (btn.isConnected) {
+            btn.innerHTML = '';
+            btn.style.color = '';
+            btn.style.fontSize = '';
+            const imgEl = document.createElement('img');
+            imgEl.src = url;
+            imgEl.alt = comp.variants[i].label;
+            btn.appendChild(imgEl);
+          }
+        }
+      });
+    }
+
+    btn.addEventListener('click', () => {
+      switchVariant(comp.id, i).then(() => {
+        container.querySelectorAll('.variant-img-btn').forEach((b, j) => {
+          b.classList.toggle('active', j === i);
+        });
+        if (onChange) onChange(i);
+      });
+    });
+    container.appendChild(btn);
+  }
+  return container;
+}
+
+function buildUploadRow(upload) {
+  const row = document.createElement('div');
+  row.className = 'upload-row';
+  const nameEl = document.createElement('span');
+  nameEl.className = 'upload-name';
+  nameEl.textContent = '📁 ' + upload.name;
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'upload-remove';
+  removeBtn.textContent = '✕';
+  removeBtn.title = '移除图片';
+  removeBtn.addEventListener('click', () => removeUserUpload(upload.id));
+  row.appendChild(nameEl);
+  row.appendChild(removeBtn);
+  return row;
+}
+
+/** Build a FAQ Q&A block for category footers. */
+function buildFaq(question, answer) {
+  const div = document.createElement('div');
+  div.className = 'faq-block';
+  const q = document.createElement('div');
+  q.className = 'faq-q';
+  q.textContent = question;
+  const a = document.createElement('div');
+  a.className = 'faq-a';
+  a.textContent = answer;
+  div.appendChild(q);
+  div.appendChild(a);
+  return div;
+}
+
+/* ============================================================
+   SECTION 11: STATE PERSISTENCE (sessionStorage)
+   ============================================================ */
+
+const STORAGE_KEY = 'nunu_factory_state';
+let savePending = false;
+
+function saveState() {
+  if (savePending) return;
+  savePending = true;
+  // Debounce: batch saves within the same microtask
+  Promise.resolve().then(() => {
+    savePending = false;
+    const data = {
+      v: 2,
+      heterochromia: state.heterochromia,
+      previewHairLayerSwapped: state.previewHairLayerSwapped,
+      colorGroups: {},
+      components: {},
+    };
+    for (const [key, cg] of Object.entries(state.colorGroups)) {
+      data.colorGroups[key] = cg.color;
+    }
+    for (const [id, cs] of Object.entries(state.components)) {
+      data.components[id] = {
+        visible: cs.visible,
+        currentVariant: cs.currentVariant,
+        offsetX: cs.offsetX,
+        offsetY: cs.offsetY,
+        flipped: cs.flipped,
+        previewOffsetY: cs.previewOffsetY,
+      };
+    }
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) { /* quota exceeded, silently ignore */ }
+  });
+}
+
+function loadSavedState() {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+function clearSavedState() {
+  try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}
+}
+
+/* ============================================================
+   SECTION 12: INITIALIZATION
+   ============================================================ */
+
+async function init() {
+  // Detect file:// protocol
+  if (window.location.protocol === 'file:') {
+    document.getElementById('file-warn').style.display = 'flex';
+    document.getElementById('loading').style.display = 'none';
+    return;
+  }
+
+  // Bind export/reset buttons
+  document.getElementById('btn-export').addEventListener('click', exportPNG);
+  document.getElementById('btn-reset').addEventListener('click', resetAll);
+  document.getElementById('btn-refresh-preview').addEventListener('click', refreshPreview);
+  document.getElementById('btn-preview-export').addEventListener('click', exportPreview);
+
+  // Bind file upload input
+  document.getElementById('user-upload-input').addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+      handleFileSelect(this.files[0]);
+    }
+  });
+
+  // ── Restore saved state if available ──
+  const saved = loadSavedState();
+  if (saved && (saved.v === 1 || saved.v === 2)) {
+    // Restore color groups
+    if (saved.colorGroups) {
+      for (const [key, color] of Object.entries(saved.colorGroups)) {
+        if (state.colorGroups[key]) {
+          state.colorGroups[key].color = color;
+        }
+      }
+    }
+    // Restore heterochromia
+    if (typeof saved.heterochromia === 'boolean') {
+      state.heterochromia = saved.heterochromia;
+    }
+    // Restore preview hair layer swap (v2+)
+    if (saved.v >= 2 && typeof saved.previewHairLayerSwapped === 'boolean') {
+      state.previewHairLayerSwapped = saved.previewHairLayerSwapped;
+    }
+    // Restore component state
+    if (saved.components) {
+      for (const [id, cs] of Object.entries(saved.components)) {
+        if (state.components[id]) {
+          Object.assign(state.components[id], {
+            visible: cs.visible,
+            currentVariant: cs.currentVariant,
+            offsetX: cs.offsetX || 0,
+            offsetY: cs.offsetY || 0,
+            flipped: cs.flipped || false,
+            previewOffsetY: cs.previewOffsetY || 0,
+          });
+        }
+      }
+    }
+    // Load components with restored variant indices
+    const fillEl = document.getElementById('progress-fill');
+    const progressEl = document.getElementById('load-progress');
+
+    const compCount = COMPONENTS.length;
+    const REAL_CAP = 20;
+    let loaded = 0;
+
+    const tasks = COMPONENTS.map(comp => {
+      const cs = state.components[comp.id];
+      const idx = (cs && typeof cs.currentVariant === 'number')
+        ? cs.currentVariant : 0;
+      return loadComponent(comp, idx).then(() => {
+        loaded++;
+        const pct = Math.round(loaded / compCount * REAL_CAP);
+        fillEl.style.width = pct + '%';
+        progressEl.textContent = pct + '%';
+      });
+    });
+    await Promise.allSettled(tasks);
+
+    const fake = startFakeProgress(fillEl, progressEl, REAL_CAP);
+    await preloadAllThumbnails();
+
+    fake.finish();
+    document.getElementById('loading').classList.add('hidden');
+  } else {
+    // Fresh start — load defaults
+    await loadAllDefaults();
+  }
+
+  // Build panel (reflects restored checkboxes & variants)
+  rebuildPanel();
+  renderAll();
+  refreshPreview();
+
+  // ── Mobile editor popup ──
+  const mobileBtn = document.getElementById('mobile-editor-btn');
+  const popupOverlay = document.getElementById('editor-popup-overlay');
+  const popupImg = document.getElementById('editor-popup-img');
+  const popupClose = document.getElementById('editor-popup-close');
+
+  mobileBtn.addEventListener('click', () => {
+    renderAll();
+    popupImg.src = editorCanvas.toDataURL('image/png');
+    popupOverlay.classList.remove('hidden');
+  });
+
+  popupClose.addEventListener('click', () => {
+    popupOverlay.classList.add('hidden');
+  });
+
+  popupOverlay.addEventListener('click', (e) => {
+    if (e.target === popupOverlay) {
+      popupOverlay.classList.add('hidden');
+    }
+  });
+
+  // ── Mobile bottom tab bar & drawer ──
+  let currentDrawerCat = null; // the .category whose body is in the drawer
+  const drawerOverlay = document.getElementById('mobile-drawer-overlay');
+  const drawerContent = document.getElementById('mobile-drawer-content');
+
+  function closeMobileDrawer() {
+    if (currentDrawerCat) {
+      const body = drawerContent.firstElementChild;
+      if (body) {
+        currentDrawerCat.appendChild(body);
+        body.style.maxHeight = '';
+        body.style.overflow = '';
+      }
+      currentDrawerCat = null;
+    }
+    drawerOverlay.classList.add('hidden');
+    document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(b => b.classList.remove('active'));
+  }
+
+  function openMobileDrawer(catKey) {
+    if (currentDrawerCat) {
+      const prevBody = drawerContent.firstElementChild;
+      if (prevBody) {
+        currentDrawerCat.appendChild(prevBody);
+        prevBody.style.maxHeight = '';
+        prevBody.style.overflow = '';
+      }
+    }
+    const cat = document.querySelector(`#panel .category[data-cat="${catKey}"]`);
+    if (!cat) return;
+    const body = cat.querySelector('.category-body');
+    if (!body) return;
+
+    drawerContent.appendChild(body);
+    body.style.maxHeight = 'none';
+    body.style.overflow = 'visible';
+    currentDrawerCat = cat;
+    drawerOverlay.classList.remove('hidden');
+
+    // Highlight active tab
+    document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(b => {
+      b.classList.toggle('active', b.dataset.cat === catKey);
+    });
+  }
+
+  document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      openMobileDrawer(tab.dataset.cat);
+    });
+  });
+
+  drawerOverlay.addEventListener('click', (e) => {
+    if (e.target === drawerOverlay) closeMobileDrawer();
+  });
+
+  // Hook rebuildPanel to auto-close drawer (panel DOM is rebuilt)
+  const origRebuildPanel = rebuildPanel;
+  rebuildPanel = function() {
+    if (currentDrawerCat) {
+      const body = drawerContent.firstElementChild;
+      if (body) {
+        body.style.maxHeight = '';
+        body.style.overflow = '';
+      }
+      currentDrawerCat = null;
+    }
+    drawerContent.innerHTML = '';
+    drawerOverlay.classList.add('hidden');
+    document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(b => b.classList.remove('active'));
+    origRebuildPanel();
+  };
+}
+
+// Run
+init();
+</script>
+<script>
+// 注册 Service Worker（缓存组件素材）
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+<script>
+/* ── 首次访问警告弹窗 ── */
+(function(){
+  if (localStorage.getItem('nunu-warn-accepted')) {
+    document.getElementById('warn-overlay').classList.add('hidden');
+    return;
+  }
+  var cb   = document.getElementById('warn-checkbox');
+  var btn  = document.getElementById('warn-confirm');
+  var ov   = document.getElementById('warn-overlay');
+  cb.addEventListener('change', function(){
+    btn.classList.toggle('enabled', cb.checked);
+  });
+  btn.addEventListener('click', function(){
+    if (cb.checked) {
+      localStorage.setItem('nunu-warn-accepted', '1');
+      ov.classList.add('hidden');
+    }
+  });
+})();
+</script>
+</body>
+</html>

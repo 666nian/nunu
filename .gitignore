@@ -1,0 +1,24 @@
+# 内部文档
+tips.txt
+文字内容清单.md
+项目决策总结.md
+DESIGN.md
+拆分部件2.8.csv
+美工图片清单.csv
+
+# 备份文件
+index_backup.html
+images/脸部定位备份.png
+
+# 已废弃组件文件
+images/face_other_edit.png
+
+# PSD源文件
+images/cloth.psd
+
+# Python
+__pycache__/
+*.pyc
+
+# Claude Code
+.claude/
