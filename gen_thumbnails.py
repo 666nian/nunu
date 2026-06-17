@@ -15,7 +15,7 @@ DEFAULT_COLORS = {
     'eye_pupil_left': (136,136,136), 'eye_pupil_right': (136,136,136),
     'eye_part_left': (51,51,51), 'eye_part_right': (51,51,51),
     'eyebrow': (74,55,40), 'mouth': (232,139,139),
-    'blush': (232,120,120), 'eye_highlight': (255,255,255),
+    'blush': (232,120,120), 'eye_highlight': (153,153,153),
     'face_other': (51,51,51),
     'bloodline_skin': (0,0,0), 'bloodline_hair': (0,0,0),
     'bloodline_back': (0,0,0),
