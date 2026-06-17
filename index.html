@@ -3829,6 +3829,7 @@ function buildVariantBtns(comp, onChange) {
       const imgEl = document.createElement('img');
       imgEl.src = cached + CACHE_BUST;
       imgEl.alt = comp.variants[i].label;
+      imgEl.loading = 'lazy';
       btn.appendChild(imgEl);
     } else {
       btn.textContent = '…';
@@ -3838,6 +3839,7 @@ function buildVariantBtns(comp, onChange) {
       const thumbFile = getThumbFile(comp, i);
       const imgEl = document.createElement('img');
       imgEl.alt = comp.variants[i].label;
+      imgEl.loading = 'lazy';
       function onThumbReady() {
         cs.thumbnailBlobs[i] = thumbFile;
         if (btn.isConnected) {
