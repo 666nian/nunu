@@ -1624,6 +1624,7 @@ for (const comp of COMPONENTS) {
     offsetY: 0,
     originalImage: null,
     imageUrl: null,
+    fullResUrl: null,
     editCache: null,
     loaded: false,
     dirty: false,         // true = needs recolor before next editor render
@@ -1718,18 +1719,23 @@ async function buildEditCache(comp, keepOriginal) {
 
   const drawHalf = (ctxObj, targetImg) => {
     const C = EYE_HL_CROP;
+    // Scale source coords from 4134 space to actual image dimensions
+    const sx = Math.round(C.x * nw / 4134);
+    const sy = Math.round(C.y * nh / 4134);
+    const smx = Math.round(C.midX * nw / 4134);
+    const swC = Math.round(C.w * nw / 4134);
+    const shC = Math.round(C.h * nh / 4134);
+    // Destination coords (fraction of canvas width/height) — same regardless of source size
+    const dxL = Math.round(C.x / 4134 * w);
+    const dy = Math.round(C.y / 4134 * h);
+    const dwL = Math.round((C.midX - C.x) / 4134 * w);
+    const dh = Math.round(C.h / 4134 * h);
+    const dxR = Math.round(C.midX / 4134 * w);
+    const dwR = Math.round((C.x + C.w - C.midX) / 4134 * w);
     if (comp.halfSide === 'left') {
-      const sw = C.midX - C.x;
-      ctxObj.drawImage(targetImg,
-        C.x, C.y, sw, C.h,
-        Math.round(C.x / nw * w), Math.round(C.y / nh * h),
-        Math.round(sw / nw * w), Math.round(C.h / nh * h));
+      ctxObj.drawImage(targetImg, sx, sy, smx - sx, shC, dxL, dy, dwL, dh);
     } else {
-      const sw = (C.x + C.w) - C.midX;
-      ctxObj.drawImage(targetImg,
-        C.midX, C.y, sw, C.h,
-        Math.round(C.midX / nw * w), Math.round(C.y / nh * h),
-        Math.round(sw / nw * w), Math.round(C.h / nh * h));
+      ctxObj.drawImage(targetImg, smx, sy, (sx + swC) - smx, shC, dxR, dy, dwR, dh);
     }
   };
 
@@ -1802,14 +1808,16 @@ async function buildEditCache(comp, keepOriginal) {
 /** Get the preview image file for a component (override or editor fallback). */
 function getPreviewFile(comp) {
   const override = PREVIEW_OVERRIDES[comp.id];
+  let file = null;
   if (override) {
     if (override.variants) {
       const idx = state.components[comp.id].currentVariant;
-      if (idx < override.variants.length) return override.variants[idx];
+      if (idx < override.variants.length) file = override.variants[idx];
     }
-    if (override.file) return override.file;
+    if (!file && override.file) file = override.file;
   }
-  return comp.variants[state.components[comp.id].currentVariant]?.file || null;
+  if (!file) file = comp.variants[state.components[comp.id].currentVariant]?.file || null;
+  return file ? file.replace('images/', 'images/light/') : null;
 }
 
 /** Get preview offset for a component. */
@@ -2213,7 +2221,7 @@ async function preloadCategoryThumbnails(catKey) {
    ============================================================ */
 
 // Bump this when replacing image files to bypass browser cache
-const CACHE_BUST = '?v=19';
+const CACHE_BUST = '?v=20';
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -2242,9 +2250,11 @@ async function loadComponent(comp, variantIdx) {
   }
 
   try {
-    const img = await loadImage(variant.file);
+    const lightFile = variant.file.replace('images/', 'images/light/');
+    const img = await loadImage(lightFile);
     cs.originalImage = img;
-    cs.imageUrl = variant.file;
+    cs.imageUrl = lightFile;
+    cs.fullResUrl = variant.file;
     cs.currentVariant = variantIdx;
     // keepOriginal=false → frees originalImage after building cache
     await buildEditCache(comp, false);
@@ -2606,8 +2616,9 @@ async function exportPreview() {
         if (!cs || !cs.visible) continue;
 
         let img = cs.originalImage;
-        if (!img && cs.imageUrl) {
-          try { img = await loadImage(cs.imageUrl); }
+        const exportUrl = cs.fullResUrl || cs.imageUrl;
+        if (!img && exportUrl) {
+          try { img = await loadImage(exportUrl); }
           catch (err) { continue; }
         }
         if (!img) continue;
@@ -2877,9 +2888,10 @@ async function exportPNG() {
 
       // Reload original image if it was freed (lazy-load optimization)
       let img = cs.originalImage;
-      if (!img && cs.imageUrl) {
+      const exportUrl = cs.fullResUrl || cs.imageUrl;
+      if (!img && exportUrl) {
         try {
-          img = await loadImage(cs.imageUrl);
+          img = await loadImage(exportUrl);
         } catch (err) {
           console.error(`导出时加载图片失败: ${comp.name}`, err);
           continue;
@@ -3023,8 +3035,9 @@ async function downloadHighRes() {
     if (!cs || !cs.visible) continue;
 
     let img = cs.originalImage;
-    if (!img && cs.imageUrl) {
-      try { img = await loadImage(cs.imageUrl); }
+    const exportUrl = cs.fullResUrl || cs.imageUrl;
+    if (!img && exportUrl) {
+      try { img = await loadImage(exportUrl); }
       catch (err) { continue; }
     }
     if (!img) continue;
