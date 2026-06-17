@@ -4,7 +4,7 @@
    版本号变更即清旧缓存，确保素材更新时用户拿到新文件
    ============================================================ */
 
-const CACHE_NAME = 'nunu-images-v13';
+const CACHE_NAME = 'nunu-images-v14';
 
 // 安装后立即激活，不等待其他标签页关闭
 self.addEventListener('install', () => {
@@ -37,8 +37,8 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) {
-        // 缓存命中 → 立即返回；同时后台更新缓存（绕过HTTP缓存获取最新文件）
-        const fetchPromise = fetch(request, { cache: 'reload' }).then((response) => {
+        // 缓存命中 → 立即返回；同时后台更新缓存
+        const fetchPromise = fetch(request).then((response) => {
           if (response.ok) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
@@ -48,7 +48,7 @@ self.addEventListener('fetch', (event) => {
         return cached;
       }
       // 缓存未命中 → 网络请求 + 存入缓存
-      return fetch(request, { cache: 'reload' }).then((response) => {
+      return fetch(request).then((response) => {
         if (!response.ok) return response;
         const clone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
