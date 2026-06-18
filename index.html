@@ -339,13 +339,45 @@ input[type="checkbox"]:checked::after {
 /* ============================================================
    Variant Image Buttons — 圆润缩略图
    ============================================================ */
+.variant-scroll-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.variant-scroll-btn {
+  width: 18px; height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #C0B0C8;
+  cursor: pointer;
+  font-size: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  transition: all 0.2s var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.variant-scroll-btn:hover {
+  color: #A080A8;
+  background: rgba(200, 180, 200, 0.2);
+}
 .variant-btns {
   display: flex;
   gap: 5px;
   flex-wrap: nowrap;
   overflow-x: auto;
+  flex: 1;
+  min-width: 0;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
 }
+.variant-btns::-webkit-scrollbar { display: none; }
 .variant-img-btn {
   width: 32px;
   height: 32px;
@@ -847,7 +879,8 @@ input[type="checkbox"]:checked::after {
   /* 移动端隐藏侧边面板 */
   #panel { display: none; }
 
-  #canvas-area { padding: 12px 10px 56px; gap: 10px; flex: 1; }
+  #canvas-area { padding: 12px 10px 56px; gap: 10px; flex: 1; transition: padding 0.3s var(--ease); }
+  #canvas-area.bar-open { padding-bottom: 140px; }
 
   /* 移动端隐藏编辑列 */
   .editor-col { display: none; }
@@ -944,111 +977,159 @@ input[type="checkbox"]:checked::after {
     to { transform: rotate(360deg); }
   }
 
-  /* ── 抽屉遮罩（透明，不覆盖导航栏和底部标签栏） ── */
-  #mobile-drawer-overlay {
+  /* ── 手机底部导航栏 ── */
+  #mobile-bar {
     position: fixed;
-    top: var(--header-h);
-    right: 0;
     bottom: 46px;
     left: 0;
+    right: 0;
     z-index: 60;
-    background: transparent;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    pointer-events: none;
-  }
-  #mobile-drawer-overlay:not(.hidden) {
-    pointer-events: auto;
-  }
-  #mobile-drawer-overlay.hidden { display: none; }
-
-  /* ── 抽屉面板 ── */
-  #mobile-drawer {
-    width: 100%;
-    max-height: 42vh;
-    background: rgba(255,255,255,0.94);
-    backdrop-filter: blur(24px) saturate(140%);
-    -webkit-backdrop-filter: blur(24px) saturate(140%);
-    border-radius: var(--r-md) var(--r-md) 0 0;
-    display: flex;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border-top: 1px solid rgba(220,200,215,0.30);
+    padding: 0;
+    display: none;
     flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 -4px 24px rgba(180,160,190,0.15);
-    transform: translateY(100%);
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  #mobile-drawer-overlay:not(.hidden) #mobile-drawer {
-    transform: translateY(0);
-  }
-  #mobile-drawer-handle {
-    width: 36px;
-    height: 4px;
-    border-radius: 2px;
-    background: #D8C8D8;
-    margin: 10px auto 6px;
-    flex-shrink: 0;
-  }
-  #mobile-drawer-content {
-    overflow-y: auto;
-    flex: 1;
-    -webkit-overflow-scrolling: touch;
-  }
-  /* 抽屉内复用 panel 样式，覆盖部分桌面端设定 */
-  #mobile-drawer-content .category {
+  #mobile-bar:not(.hidden) { display: flex; }
+  #mobile-bar.hidden { display: none; }
+
+  /* ── 设定区域（变体 + 颜色 + 位置） ── */
+  #mobile-bar-settings {
+    padding: 8px 10px 4px;
     border-bottom: 1px solid rgba(220,200,215,0.15);
-  }
-  #mobile-drawer-content .category-header {
-    font-size: 13px;
-    padding: 11px 18px;
-    position: static;
-  }
-  #mobile-drawer-content .category-body {
-    max-height: none;
+    min-height: 0;
     overflow: visible;
   }
-  #mobile-drawer-content .comp-row {
-    padding: 9px 18px;
+
+  /* ── 组件按钮行（水平滚动） ── */
+  #mobile-bar-comps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 6px 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    min-height: 42px;
   }
-  #mobile-drawer-content .comp-name {
+  #mobile-bar-comps::-webkit-scrollbar { display: none; }
+
+  .bar-comp-btn {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    margin: 0 2px;
+    border: none;
+    border-radius: 20px;
+    background: rgba(245,235,240,0.6);
+    color: var(--text);
     font-size: 12px;
+    font-weight: 500;
+    font-family: var(--font);
+    cursor: pointer;
+    letter-spacing: 0.2px;
+    transition: all 0.2s var(--ease);
+    white-space: nowrap;
   }
-  #mobile-drawer-content .upload-section {
-    padding: 8px 18px;
+  .bar-comp-btn:active {
+    background: rgba(232,168,184,0.25);
+    transform: scale(0.95);
   }
-  #mobile-drawer-content .faq-block {
-    margin: 4px 12px 10px;
-    padding: 8px 12px;
-    font-size: 11px;
+  .bar-comp-btn.active {
+    background: rgba(208,128,144,0.18);
+    color: #C87080;
+    font-weight: 600;
+  }
+  .bar-comp-btn.back-btn {
+    width: 32px; height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bar-comp-btn.sync-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .bar-comp-btn.sync-btn input {
+    cursor: pointer;
   }
 
-  /* ── 浮动查看编辑图按钮 ── */
+  /* ── 设定区内样式 ── */
+  #mobile-bar-settings .bar-settings-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  #mobile-bar-settings .bar-section-title {
+    font-size: 10px;
+    color: var(--text-soft);
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+  #mobile-bar-settings .variant-scroll-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+  #mobile-bar-settings .bar-pos-btn {
+    width: 32px; height: 32px;
+    padding: 0;
+    border: 1px solid rgba(200,180,200,0.4);
+    border-radius: 8px;
+    background: rgba(255,245,250,0.5);
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    font-family: var(--font);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #mobile-bar-settings .bar-pos-btn:active {
+    background: rgba(232,168,184,0.2);
+    border-color: #D8B8C8;
+  }
+  #mobile-bar-settings .color-swatch {
+    flex-shrink: 0;
+  }
+
   #mobile-editor-btn {
     position: fixed;
     right: 12px;
     bottom: 62px;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
+    height: 40px;
+    border-radius: 22px;
     border: 1px solid rgba(220,200,215,0.4);
     background: rgba(255,255,255,0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: #C88898;
-    font-size: 20px;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
     z-index: 50;
     box-shadow: 0 2px 12px rgba(180,160,190,0.18);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
+    padding: 0 16px;
     transition: all 0.25s var(--ease);
+    letter-spacing: 0.5px;
   }
   #mobile-editor-btn:active {
     transform: scale(0.92);
     background: rgba(232,168,184,0.15);
   }
+  #btn-export { display: none; }
 
   /* ── 编辑图弹窗 ── */
   #editor-popup-overlay {
@@ -1341,12 +1422,10 @@ input[type="checkbox"]:checked::after {
   <button class="mobile-tab" data-cat="bloodline">血线</button>
 </nav>
 
-<!-- Mobile category drawer -->
-<div id="mobile-drawer-overlay" class="mobile-only hidden">
-  <div id="mobile-drawer">
-    <div id="mobile-drawer-handle"></div>
-    <div id="mobile-drawer-content"></div>
-  </div>
+<!-- Mobile bottom bar for component navigation -->
+<div id="mobile-bar" class="mobile-only hidden">
+  <div id="mobile-bar-settings"></div>
+  <div id="mobile-bar-comps"></div>
 </div>
 
 <!-- Hidden file input for user image upload -->
@@ -1360,7 +1439,7 @@ input[type="checkbox"]:checked::after {
     <button id="editor-popup-download">下载高清图</button>
   </div>
 </div>
-<button id="mobile-editor-btn" class="mobile-only" title="查看编辑图">✎</button>
+<button id="mobile-editor-btn" class="mobile-only" title="导出图纸">导出图纸</button>
 
 <script>
 /* ============================================================
@@ -1817,7 +1896,7 @@ function getPreviewFile(comp) {
     if (!file && override.file) file = override.file;
   }
   if (!file) file = comp.variants[state.components[comp.id].currentVariant]?.file || null;
-  return file ? file.replace('images/', 'images/light/') : null;
+  return file || null;
 }
 
 /** Get preview offset for a component. */
@@ -2590,9 +2669,13 @@ async function exportPreview() {
 
     const previewSorted = SORTED.filter(c => PREVIEW_OVERRIDES[c.id])
       .sort((a, b) => (PREVIEW_OVERRIDES[a.id].previewZ || 0) - (PREVIEW_OVERRIDES[b.id].previewZ || 0));
-    for (const comp of previewSorted) {
+    const visiblePreview = previewSorted.filter(c => {
+      const cs = state.components[c.id];
+      return cs && cs.visible;
+    });
+    let done = 0;
+    for (const comp of visiblePreview) {
       const cs = state.components[comp.id];
-      if (!cs || !cs.visible) continue;
       // ── Dedicated preview-image export path ──────────────
       const file = getPreviewFile(comp);
       if (!file) continue;
@@ -2642,6 +2725,9 @@ async function exportPreview() {
         pCtx.shadowOffsetX = 0;
         pCtx.shadowOffsetY = 0;
       }
+
+      done++;
+      btn.textContent = `⏳ 导出中 ${Math.round(done / visiblePreview.length * 100)}%...`;
     }
 
     // Phase 2: overlay each PREVIEW_CROPS entry at full resolution (4134²).
@@ -2661,9 +2747,9 @@ async function exportPreview() {
         const cs = state.components[comp.id];
         if (!cs || !cs.visible) continue;
 
-        let img = cs.originalImage;
-        const exportUrl = cs.fullResUrl || cs.imageUrl;
-        if (!img && exportUrl) {
+        let img = null;
+        const exportUrl = cs.fullResUrl;
+        if (exportUrl) {
           try { img = await loadImage(exportUrl); }
           catch (err) { continue; }
         }
@@ -2932,10 +3018,10 @@ async function exportPNG() {
       const cs = state.components[comp.id];
       if (!cs || !cs.visible) continue;
 
-      // Reload original image if it was freed (lazy-load optimization)
-      let img = cs.originalImage;
+      // Always load full-res image for export
+      let img = null;
       const exportUrl = cs.fullResUrl || cs.imageUrl;
-      if (!img && exportUrl) {
+      if (exportUrl) {
         try {
           img = await loadImage(exportUrl);
         } catch (err) {
@@ -3058,11 +3144,11 @@ async function exportPNG() {
 async function downloadHighRes() {
   const btn = document.getElementById('editor-popup-download');
   const origText = btn.textContent;
-  btn.textContent = '生成中...';
+  btn.textContent = '⏳ 正在加载 0%...';
   btn.disabled = true;
 
   try {
-  const size = 2000;
+  const size = EXPORT_SIZE;
   const exportScale = size / EDIT_SIZE;
 
   const cvs = document.createElement('canvas');
@@ -3076,15 +3162,21 @@ async function downloadHighRes() {
   const off = document.createElement('canvas');
   const offCtx = off.getContext('2d');
 
-  for (const comp of SORTED) {
-    const cs = state.components[comp.id];
-    if (!cs || !cs.visible) continue;
+  const visible = SORTED.filter(c => {
+    const cs = state.components[c.id];
+    return cs && cs.visible;
+  });
+  const total = visible.length + state.userUploads.length;
+  let done = 0;
 
-    let img = cs.originalImage;
-    const exportUrl = cs.fullResUrl || cs.imageUrl;
-    if (!img && exportUrl) {
+  for (const comp of visible) {
+    const cs = state.components[comp.id];
+
+    let img = null;
+    const exportUrl = cs.fullResUrl;
+    if (exportUrl) {
       try { img = await loadImage(exportUrl); }
-      catch (err) { continue; }
+      catch (err) { console.error(err); }
     }
     if (!img) continue;
 
@@ -3109,6 +3201,9 @@ async function downloadHighRes() {
       offCtx.drawImage(img, 0, 0, w, h);
       exCtx.drawImage(off, x, y);
     }
+
+    done++;
+    btn.textContent = `⏳ 正在导出 ${Math.round(done / total * 100)}%...`;
   }
 
   // User uploads
@@ -3123,8 +3218,11 @@ async function downloadHighRes() {
     const x = Math.round((size - w) / 2 + upload.offsetX * exportScale);
     const y = Math.round((size - h) / 2 + upload.offsetY * exportScale);
     exCtx.drawImage(img, x, y, w, h);
+    done++;
+    btn.textContent = `⏳ 正在导出 ${Math.round(done / total * 100)}%...`;
   }
 
+  btn.textContent = '⏳ 正在生成文件...';
   const blob = await new Promise((resolve, reject) => {
     cvs.toBlob(b => b ? resolve(b) : reject(new Error('toBlob null')), 'image/png');
   });
@@ -3856,8 +3954,38 @@ function buildVariantBtns(comp, onChange) {
   const cs = state.components[comp.id];
   if (!cs.thumbnailBlobs) cs.thumbnailBlobs = {};
 
+  const wrapper = document.createElement('span');
+  wrapper.className = 'variant-scroll-wrap';
+
+  const scrollLeft = document.createElement('button');
+  scrollLeft.className = 'variant-scroll-btn';
+  scrollLeft.textContent = '◀';
+  scrollLeft.title = '向左滚动';
+
   const container = document.createElement('span');
   container.className = 'variant-btns';
+
+  const scrollRight = document.createElement('button');
+  scrollRight.className = 'variant-scroll-btn';
+  scrollRight.textContent = '▶';
+  scrollRight.title = '向右滚动';
+
+  function updateArrows() {
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    scrollLeft.style.visibility = container.scrollLeft <= 0 ? 'hidden' : 'visible';
+    scrollRight.style.visibility = container.scrollLeft >= maxScroll - 1 ? 'hidden' : 'visible';
+  }
+
+  scrollLeft.addEventListener('click', () => {
+    container.scrollBy({ left: -100, behavior: 'smooth' });
+    setTimeout(updateArrows, 200);
+  });
+  scrollRight.addEventListener('click', () => {
+    container.scrollBy({ left: 100, behavior: 'smooth' });
+    setTimeout(updateArrows, 200);
+  });
+  container.addEventListener('scroll', updateArrows);
+  new ResizeObserver(updateArrows).observe(container);
 
   for (let i = 0; i < comp.variants.length; i++) {
     const btn = document.createElement('button');
@@ -3885,11 +4013,11 @@ function buildVariantBtns(comp, onChange) {
           btn.style.color = '';
           btn.style.fontSize = '';
           btn.appendChild(imgEl);
+          updateArrows();
         }
       }
       imgEl.onload = onThumbReady;
       imgEl.onerror = () => {
-        // Fallback: generate thumbnail on-the-fly
         generateThumbnail(comp, i).then(url => {
           if (url) {
             cs.thumbnailBlobs[i] = url;
@@ -3901,12 +4029,12 @@ function buildVariantBtns(comp, onChange) {
               fallbackImg.src = url;
               fallbackImg.alt = comp.variants[i].label;
               btn.appendChild(fallbackImg);
+              updateArrows();
             }
           }
         });
       };
       imgEl.src = thumbFile + CACHE_BUST;
-      // Handle cached/synchronous load where onload may not fire
       if (imgEl.complete) onThumbReady();
     }
 
@@ -3920,7 +4048,12 @@ function buildVariantBtns(comp, onChange) {
     });
     container.appendChild(btn);
   }
-  return container;
+
+  wrapper.appendChild(scrollLeft);
+  wrapper.appendChild(container);
+  wrapper.appendChild(scrollRight);
+
+  return wrapper;
 }
 
 function buildUploadRow(upload) {
@@ -4124,82 +4257,393 @@ async function init() {
     }
   });
 
-  // ── Mobile bottom tab bar & drawer ──
-  let currentDrawerCat = null; // the .category whose body is in the drawer
-  const drawerOverlay = document.getElementById('mobile-drawer-overlay');
-  const drawerContent = document.getElementById('mobile-drawer-content');
+  // ── Mobile bottom bar navigation ──
+  const mobileBar = document.getElementById('mobile-bar');
+  const barSettings = document.getElementById('mobile-bar-settings');
+  const barComps = document.getElementById('mobile-bar-comps');
 
-  function closeMobileDrawer() {
-    if (currentDrawerCat) {
-      const body = drawerContent.firstElementChild;
-      if (body) {
-        currentDrawerCat.appendChild(body);
-        body.style.maxHeight = '';
-        body.style.overflow = '';
-      }
-      currentDrawerCat = null;
-    }
-    drawerOverlay.classList.add('hidden');
+  // Stack for eye sub-navigation
+  let barNavStack = [];
+
+  function showMobileBar() {
+    mobileBar.classList.remove('hidden');
+    document.getElementById('canvas-area').classList.add('bar-open');
+  }
+  function hideMobileBar() {
+    mobileBar.classList.add('hidden');
+    barSettings.innerHTML = '';
+    barComps.innerHTML = '';
+    barNavStack = [];
+    document.getElementById('canvas-area').classList.remove('bar-open');
     document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(b => b.classList.remove('active'));
   }
 
-  function openMobileDrawer(catKey) {
-    if (currentDrawerCat) {
-      const prevBody = drawerContent.firstElementChild;
-      if (prevBody) {
-        currentDrawerCat.appendChild(prevBody);
-        prevBody.style.maxHeight = '';
-        prevBody.style.overflow = '';
-      }
+  function buildCompRow(catKey) {
+    barNavStack = [{ type: 'cat', catKey: catKey }];
+    let catComps = COMPONENTS.filter(c => c.category === catKey && !c.hidden);
+
+    barComps.innerHTML = '';
+    barSettings.innerHTML = '';
+
+    // Show category extras when no component selected
+    if (catKey === 'hair') {
+      // "打底在上" swap checkbox (matches desktop)
+      const swapRow = document.createElement('div');
+      swapRow.className = 'bar-settings-row';
+      const swapLabel = document.createElement('label');
+      swapLabel.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-soft);cursor:pointer;user-select:none;';
+      const swapCb = document.createElement('input');
+      swapCb.type = 'checkbox';
+      swapCb.checked = state.previewHairLayerSwapped;
+      swapCb.style.cssText = 'width:16px;height:16px;margin:0;';
+      swapCb.addEventListener('change', () => {
+        state.previewHairLayerSwapped = swapCb.checked;
+        refreshPreview();
+        saveState();
+      });
+      swapLabel.appendChild(swapCb);
+      swapLabel.appendChild(document.createTextNode('打底在上'));
+      swapRow.appendChild(swapLabel);
+      barSettings.appendChild(swapRow);
+    } else if (catKey === 'face') {
+      const faq = document.createElement('div');
+      faq.style.cssText = 'padding:4px 10px;font-size:10px;color:var(--text-soft);line-height:1.5;';
+      faq.innerHTML = '<b>Q：为什么脸部组件不支持自定义位置！</b><br>A：缝制后效果与平面效果不同，固定位置经过测试后更呆萌哟~';
+      barSettings.appendChild(faq);
+    } else if (catKey === 'body') {
+      const faq = document.createElement('div');
+      faq.style.cssText = 'padding:4px 10px;font-size:10px;color:var(--text-soft);line-height:1.5;';
+      faq.innerHTML = '<b>Q：想自己导入服装，怎么办？</b><br>A：点击"下载模板"，根据下载的psd文档内容进行绘制，完成后再导入图片即可~';
+      barSettings.appendChild(faq);
+    } else if (catKey === 'bloodline') {
+      const faq = document.createElement('div');
+      faq.style.cssText = 'padding:4px 10px;font-size:10px;color:var(--text-soft);line-height:1.5;';
+      faq.innerHTML = '<b>Q：血线的颜色要怎么选择？</b><br>A：肤色与发色的血线最好选择与肤色/发色颜色相近的颜色，但也不要特别近！图纸印刷后颜色过于接近会导致看不清楚血线哦。黑色/深灰色部件的血线最好选用浅灰色！';
+      barSettings.appendChild(faq);
     }
-    const cat = document.querySelector(`#panel .category[data-cat="${catKey}"]`);
-    if (!cat) return;
-    const body = cat.querySelector('.category-body');
-    if (!body) return;
 
-    drawerContent.appendChild(body);
-    body.style.maxHeight = 'none';
-    body.style.overflow = 'visible';
-    currentDrawerCat = cat;
-    drawerOverlay.classList.remove('hidden');
+    // Face: group eye sub-components into 左眼/右眼
+    if (catKey === 'face') {
+      catComps = catComps.filter(c => !c.eyeSide && !c.halfSide);
+      catComps.push({ id: '::eye_left', name: '左眼', category: 'face', variants: [] });
+      catComps.push({ id: '::eye_right', name: '右眼', category: 'face', variants: [] });
+    }
+    // Body: merge clothing into one button
+    if (catKey === 'body') {
+      catComps = catComps.filter(c => c.id === 'skin_body');
+      catComps.push({ id: '::clothing', name: '服装', category: 'body', variants: [] });
+    }
 
-    // Highlight active tab
-    document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(b => {
-      b.classList.toggle('active', b.dataset.cat === catKey);
-    });
+    for (const comp of catComps) {
+      const btn = document.createElement('button');
+      btn.className = 'bar-comp-btn';
+      btn.textContent = comp.name;
+      btn.addEventListener('click', () => {
+        barComps.querySelectorAll('.bar-comp-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        if (comp.id === '::eye_left') {
+          showEyeSubBar('left');
+        } else if (comp.id === '::eye_right') {
+          showEyeSubBar('right');
+        } else if (comp.id === '::clothing') {
+          showClothingSection();
+        } else {
+          showCompSettings(comp.id);
+        }
+      });
+      barComps.appendChild(btn);
+    }
+    showMobileBar();
   }
 
+  function showEyeSubBar(side) {
+    const isLeft = side === 'left';
+    // Replace top state if re-entering (e.g. after toggling sync checkbox)
+    if (barNavStack.length && barNavStack[barNavStack.length - 1].type === 'eye') {
+      barNavStack[barNavStack.length - 1] = { type: 'eye', side: side };
+    } else {
+      barNavStack.push({ type: 'eye', side: side });
+    }
+
+    barComps.innerHTML = '';
+    barSettings.innerHTML = '';
+
+    // Back button
+    const backBtn = document.createElement('button');
+    backBtn.className = 'bar-comp-btn back-btn';
+    backBtn.textContent = '←';
+    backBtn.title = '返回';
+    backBtn.addEventListener('click', () => {
+      barNavStack.pop();
+      const prev = barNavStack[barNavStack.length - 1];
+      if (prev && prev.type === 'cat') {
+        buildCompRow(prev.catKey);
+      }
+    });
+    barComps.appendChild(backBtn);
+
+    // Right eye: sync checkbox
+    if (!isLeft) {
+      const syncLabel = document.createElement('label');
+      syncLabel.className = 'bar-comp-btn sync-btn';
+      const syncCb = document.createElement('input');
+      syncCb.type = 'checkbox';
+      syncCb.checked = !state.heterochromia;
+      syncCb.addEventListener('change', () => {
+        toggleHeterochromia(!syncCb.checked);
+        showEyeSubBar(side);
+      });
+      syncLabel.appendChild(syncCb);
+      syncLabel.appendChild(document.createTextNode('与左眼同步'));
+      barComps.appendChild(syncLabel);
+
+      if (!state.heterochromia) return;
+    }
+
+    const items = [
+      { id: 'eye_highlight_' + side, label: '高光' },
+      { id: 'eye_pupil_' + side, label: '瞳孔' },
+      { id: 'eye_part_' + side, label: '底色' },
+    ];
+
+    for (const { id, label } of items) {
+      const comp = COMPONENTS.find(c => c.id === id);
+      if (!comp) continue;
+      const btn = document.createElement('button');
+      btn.className = 'bar-comp-btn';
+      btn.textContent = label;
+      btn.addEventListener('click', () => {
+        barComps.querySelectorAll('.bar-comp-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        showCompSettings(id);
+      });
+      barComps.appendChild(btn);
+    }
+
+    // Auto-select first item
+    const firstBtn = barComps.querySelector('.bar-comp-btn:not(.back-btn):not(.sync-btn)');
+    if (firstBtn) {
+      firstBtn.classList.add('active');
+      const firstItem = items[0];
+      showCompSettings(firstItem.id);
+    }
+  }
+
+  function showClothingSection() {
+    barSettings.innerHTML = '';
+    const wrap = document.createElement('div');
+    const row = document.createElement('div');
+    row.className = 'bar-settings-row';
+
+    const dlBtn = document.createElement('a');
+    dlBtn.className = 'bar-pos-btn';
+    dlBtn.textContent = '下载模板';
+    dlBtn.title = '下载模板';
+    dlBtn.href = 'images/cloth.psd';
+    dlBtn.download = 'cloth.psd';
+    dlBtn.style.cssText = 'text-decoration:none;width:auto;padding:0 10px;font-size:11px;';
+
+    const importBtn = document.createElement('button');
+    importBtn.className = 'bar-pos-btn';
+    importBtn.textContent = '导入图片';
+    importBtn.title = '导入图片';
+    importBtn.style.cssText = 'width:auto;padding:0 10px;font-size:11px;';
+    importBtn.addEventListener('click', triggerUpload);
+
+    row.appendChild(dlBtn);
+    row.appendChild(importBtn);
+    wrap.appendChild(row);
+
+    // Show uploaded clothing
+    for (const upload of state.userUploads) {
+      const uRow = document.createElement('div');
+      uRow.className = 'bar-settings-row';
+      const uName = document.createElement('span');
+      uName.style.cssText = 'font-size:11px;color:var(--text);flex:1;';
+      uName.textContent = '📁 ' + upload.name;
+      const uDel = document.createElement('button');
+      uDel.className = 'bar-pos-btn';
+      uDel.textContent = '✕';
+      uDel.addEventListener('click', () => removeUserUpload(upload.id));
+      uRow.appendChild(uName);
+      uRow.appendChild(uDel);
+      wrap.appendChild(uRow);
+    }
+
+    barSettings.appendChild(wrap);
+  }
+
+  function showCompSettings(compId) {
+    const comp = COMPONENTS.find(c => c.id === compId);
+    if (!comp) return;
+    const cs = state.components[compId];
+
+    barSettings.innerHTML = '';
+    const wrap = document.createElement('div');
+
+    // Visibility toggle for optional components
+    if (comp.optional) {
+      const visRow = document.createElement('div');
+      visRow.className = 'bar-settings-row';
+      const visLabel = document.createElement('label');
+      visLabel.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-soft);cursor:pointer;user-select:none;';
+      const visCb = document.createElement('input');
+      visCb.type = 'checkbox';
+      visCb.checked = cs.visible;
+      visCb.style.cssText = 'width:16px;height:16px;margin:0;';
+      visCb.addEventListener('change', () => toggleVisibility(compId, visCb.checked));
+      visLabel.appendChild(visCb);
+      visLabel.appendChild(document.createTextNode('显示组件'));
+      visRow.appendChild(visLabel);
+      wrap.appendChild(visRow);
+    }
+
+    // Variant thumbnails
+    if (comp.variants.length > 1) {
+      const title = document.createElement('div');
+      title.className = 'bar-section-title';
+      title.textContent = '变体';
+      wrap.appendChild(title);
+      wrap.appendChild(buildVariantBtns(comp));
+    }
+
+    // Color + position row
+    const row = document.createElement('div');
+    row.className = 'bar-settings-row';
+
+    // Color swatch
+    if (comp.colorGroup && !comp.panelHideColor) {
+      if (!isLinked(comp)) {
+        row.appendChild(buildColorSwatchForGroup(comp.colorGroup));
+      } else {
+        const label = document.createElement('span');
+        label.style.cssText = 'font-size:11px;color:var(--text-soft);';
+        const src = getLinkSource(comp);
+        label.textContent = src ? '继承' + src.name + '色' : '继承';
+        row.appendChild(label);
+      }
+    }
+
+    // Flip
+    if (comp.flippable) {
+      const flipBtn = document.createElement('button');
+      flipBtn.className = 'bar-pos-btn';
+      flipBtn.textContent = '↔';
+      flipBtn.title = '镜像翻转';
+      const updateFlipStyle = () => {
+        flipBtn.style.background = cs.flipped ? 'rgba(208,128,144,0.18)' : '';
+        flipBtn.style.color = cs.flipped ? '#C87080' : '';
+      };
+      updateFlipStyle();
+      flipBtn.addEventListener('click', () => {
+        cs.flipped = !cs.flipped;
+        cs.dirty = true;
+        scheduleRender();
+        saveState();
+        updateFlipStyle();
+      });
+      row.appendChild(flipBtn);
+    }
+
+    // Position
+    if (comp.positionable) {
+      if (comp.previewPositionable) {
+        const lbl = document.createElement('span');
+        lbl.style.cssText = 'font-size:9px;color:var(--text-soft);margin-right:2px;';
+        lbl.textContent = '编辑';
+        row.appendChild(lbl);
+      }
+      const upBtn = document.createElement('button');
+      upBtn.className = 'bar-pos-btn';
+      upBtn.textContent = '▲';
+      upBtn.addEventListener('click', () => {
+        cs.offsetY = Math.max(-15, cs.offsetY - 3);
+        scheduleRender();
+      });
+      const downBtn = document.createElement('button');
+      downBtn.className = 'bar-pos-btn';
+      downBtn.textContent = '▼';
+      downBtn.addEventListener('click', () => {
+        cs.offsetY = Math.min(15, cs.offsetY + 3);
+        scheduleRender();
+      });
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'bar-pos-btn';
+      resetBtn.textContent = '↺';
+      resetBtn.addEventListener('click', () => {
+        cs.offsetY = 0;
+        scheduleRender();
+      });
+      row.appendChild(upBtn);
+      row.appendChild(downBtn);
+      row.appendChild(resetBtn);
+    }
+
+    // Preview position
+    if (comp.previewPositionable) {
+      const lbl = document.createElement('span');
+      lbl.style.cssText = 'font-size:9px;color:var(--text-soft);margin-right:2px;';
+      lbl.textContent = '预览';
+      row.appendChild(lbl);
+      const upBtn = document.createElement('button');
+      upBtn.className = 'bar-pos-btn';
+      upBtn.textContent = '▲';
+      upBtn.title = '预览上移';
+      upBtn.addEventListener('click', () => {
+        cs.previewOffsetY = Math.max(-0.20, +(cs.previewOffsetY - 0.02).toFixed(4));
+        renderPreviewBase(); renderPreviewOverlay(); saveState();
+      });
+      const downBtn = document.createElement('button');
+      downBtn.className = 'bar-pos-btn';
+      downBtn.textContent = '▼';
+      downBtn.title = '预览下移';
+      downBtn.addEventListener('click', () => {
+        cs.previewOffsetY = Math.min(0.20, +(cs.previewOffsetY + 0.02).toFixed(4));
+        renderPreviewBase(); renderPreviewOverlay(); saveState();
+      });
+      const resetBtn = document.createElement('button');
+      resetBtn.className = 'bar-pos-btn';
+      resetBtn.textContent = '↺';
+      resetBtn.title = '重置预览位置';
+      resetBtn.addEventListener('click', () => {
+        cs.previewOffsetY = 0;
+        renderPreviewBase(); renderPreviewOverlay(); saveState();
+      });
+      row.appendChild(upBtn);
+      row.appendChild(downBtn);
+      row.appendChild(resetBtn);
+    }
+
+    wrap.appendChild(row);
+    barSettings.appendChild(wrap);
+  }
+
+  // Tab click handlers
   document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(tab => {
     tab.addEventListener('click', async () => {
       const catKey = tab.dataset.cat;
-      // Show loading state on tab
+      // Toggle: clicking active tab closes the bar
+      if (barNavStack.length > 0 && barNavStack[0].catKey === catKey && !mobileBar.classList.contains('hidden')) {
+        hideMobileBar();
+        return;
+      }
       tab.classList.add('loading');
       await preloadCategoryThumbnails(catKey);
       tab.classList.remove('loading');
-      openMobileDrawer(catKey);
+      document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(b => {
+        b.classList.toggle('active', b.dataset.cat === catKey);
+      });
+      buildCompRow(catKey);
     });
   });
 
-  drawerOverlay.addEventListener('click', (e) => {
-    if (e.target === drawerOverlay) closeMobileDrawer();
+  // Click canvas area to close mobile bar
+  document.getElementById('canvas-area').addEventListener('click', () => {
+    if (!mobileBar.classList.contains('hidden')) hideMobileBar();
   });
 
-  // Hook rebuildPanel to auto-close drawer (panel DOM is rebuilt)
-  const origRebuildPanel = rebuildPanel;
-  rebuildPanel = function() {
-    if (currentDrawerCat) {
-      const body = drawerContent.firstElementChild;
-      if (body) {
-        body.style.maxHeight = '';
-        body.style.overflow = '';
-      }
-      currentDrawerCat = null;
-    }
-    drawerContent.innerHTML = '';
-    drawerOverlay.classList.add('hidden');
-    document.querySelectorAll('#mobile-tabs .mobile-tab').forEach(b => b.classList.remove('active'));
-    origRebuildPanel();
-  };
+  // rebuildPanel now runs as-is (no drawer to close — mobile bar is independent)
 }
 
 // Run
