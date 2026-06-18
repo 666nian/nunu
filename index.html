@@ -1896,6 +1896,21 @@ function getPreviewFile(comp) {
     if (!file && override.file) file = override.file;
   }
   if (!file) file = comp.variants[state.components[comp.id].currentVariant]?.file || null;
+  return file ? file.replace('images/', 'images/light/') : null;
+}
+
+/** Get full-res preview file path for export. */
+function getPreviewFileFullRes(comp) {
+  const override = PREVIEW_OVERRIDES[comp.id];
+  let file = null;
+  if (override) {
+    if (override.variants) {
+      const idx = state.components[comp.id].currentVariant;
+      if (idx < override.variants.length) file = override.variants[idx];
+    }
+    if (!file && override.file) file = override.file;
+  }
+  if (!file) file = comp.variants[state.components[comp.id].currentVariant]?.file || null;
   return file || null;
 }
 
@@ -2677,7 +2692,7 @@ async function exportPreview() {
     for (const comp of visiblePreview) {
       const cs = state.components[comp.id];
       // ── Dedicated preview-image export path ──────────────
-      const file = getPreviewFile(comp);
+      const file = getPreviewFileFullRes(comp);
       if (!file) continue;
       let img;
       try {
@@ -3188,7 +3203,7 @@ async function downloadHighRes() {
     const x = Math.round((size - w) / 2 + cs.offsetX * exportScale);
     const y = Math.round((size - h) / 2 + cs.offsetY * exportScale);
 
-    const color = comp.colorGroup ? state.colorGroups[comp.colorGroup]?.color : null;
+    const color = getEffectiveColor(comp);
     if (!color || comp.colorGroup === 'canvas_bg') {
       exCtx.drawImage(img, x, y, w, h);
     } else {
